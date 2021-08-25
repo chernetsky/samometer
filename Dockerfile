@@ -4,7 +4,8 @@ WORKDIR /usr/samometer
 
 # Зависимости обновятся только при изменении package.json. Если package.json
 # не менялся, то обновления не будет
-COPY package-lock.json ./
+COPY package*.json ./
+
 RUN npm ci
 
 # Добавляем все файлы в контейнер
