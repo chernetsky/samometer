@@ -4,12 +4,12 @@ WORKDIR /usr/samometer
 
 # Зависимости обновятся только при изменении package.json. Если package.json
 # не менялся, то обновления не будет
-COPY package.json ./
-RUN npm install
+COPY package-lock.json ./
+RUN npm ci
 
 # Добавляем все файлы в контейнер
 COPY . .
 
-ENTRYPOINT ["/sbin/tini", "--"]
+# ENTRYPOINT ["/sbin/tini", "--"]
 
 CMD ["sh", "-c", "node -v; npm -v; npm run start"]
