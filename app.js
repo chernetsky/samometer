@@ -3,7 +3,10 @@ const app = express()
 const port = 5000
 
 app.get('/', (req, res) => {
-  res.send(new Date())
+  res.json({
+    message: 'Hi from Samometer bot!',
+    now: new Date()
+  })
 })
 
 app.listen(port, () => {
