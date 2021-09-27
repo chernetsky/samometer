@@ -1,0 +1,14 @@
+version: "3.4"
+services:
+  samometer:
+    build: .
+    ports:
+      - 5000:5000
+  # db:
+  #   image: postgres:11.9
+  #   ports:
+  #     - 5432:5432
+  #   environment:
+  #     POSTGRES_USER: test_wazzup
+  #     POSTGRES_PASSWORD: test_password
+  #     POSTGRES_DB: test_wazzup
