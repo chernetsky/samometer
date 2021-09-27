@@ -39,7 +39,7 @@ jobs:
           context: ./
           file: ./Dockerfile
           push: true
-          tags: chernetsky/$IMAGE:latest
+          tags: chernetsky/samometer:latest
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
