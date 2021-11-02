@@ -41,7 +41,7 @@ jobs:
           remote: ${{ secrets.SSH_DIR }}
           host: ${{ secrets.SSH_HOST }}
           # port: ${{ secrets.SSH_PORT }}
-          user: ${{ secrets.SSH_USER }}
+          user: graph
           key: ${{ secrets.SSH_KEY }}
 
 
