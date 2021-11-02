@@ -34,6 +34,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Check Out Repo 
+        uses: actions/checkout@v2
+
       - name: Publish
         uses: nogsantos/scp-deploy@master
         with:
