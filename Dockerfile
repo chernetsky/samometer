@@ -13,4 +13,4 @@ COPY . .
 
 # ENTRYPOINT ["/sbin/tini", "--"]
 
-CMD ["sh", "-c", "node -v; npm -v; npm run start"]
+CMD ["sh", "-c", "node -v; npm run start"]
