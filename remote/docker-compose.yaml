@@ -1,7 +1,7 @@
 version: "3.4"
 services:
   samometer:
-    build: chernetsky/samometer:latest
+    image: chernetsky/samometer:latest
     ports:
       - 5000:5000
 
