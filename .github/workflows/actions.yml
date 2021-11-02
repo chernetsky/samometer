@@ -40,7 +40,7 @@ jobs:
       - name: Publish
         uses: nogsantos/scp-deploy@master
         with:
-          src: ./remote/scp.me
+          src: ./remote/*
           remote: ${{ secrets.SSH_DIR }}
           host: ${{ secrets.SSH_HOST }}
           user: ${{ secrets.SSH_USER }}
