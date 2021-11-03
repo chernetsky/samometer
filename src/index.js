@@ -5,7 +5,7 @@ const port = 5000
 app.get('/', (req, res) => {
   res.json({
     message: 'Hi from Samometer bot!',
-    version: 'v0.0.1',
+    version: process.env.npm_package_version,
     now: new Date()
   })
 })
