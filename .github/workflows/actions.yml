@@ -52,19 +52,10 @@ jobs:
           user: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
 
-  # deploy:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Check Out Repo 
-  #       uses: actions/checkout@v2
-
-  #     - name: Publish
-  #       uses: nogsantos/scp-deploy@master
-  #       with:
-  #         src: ./remote/*
-  #         remote: ${{ secrets.SSH_DIR }}
-  #         host: ${{ secrets.SSH_HOST }}
-  #         user: ${{ secrets.SSH_USER }}
-  #         key: ${{ secrets.SSH_KEY }}
-
-
+      - name: Recompose
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: docker-compose down --rmi all
