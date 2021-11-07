@@ -1,13 +1,20 @@
-const express = require('express')
-const app = express()
-const port = 5000
+const express = require('express');
+const { PrismaClient } = require('@prisma/client');
 
-app.get('/', (req, res) => {
+const app = express();
+const port = 5000;
+const prisma = new PrismaClient();
+
+app.get('/', async (req, res) => { 
+  const newVisit = await prisma.visit.create({ data: {} });
+  const visits = await prisma.visit.findMany();
+
   res.json({
     message: 'Hi from Samometer bot!',
     version: process.env.npm_package_version,
-    now: new Date()
-  })
+    now: new Date(),
+    visits: visits.length
+  });
 })
 
 app.listen(port, () => {
