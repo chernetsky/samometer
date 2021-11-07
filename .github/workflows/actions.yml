@@ -58,4 +58,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
-          script: docker-compose down --rmi all
+          script: |
+            pwd
+            cd samometer
+            docker-compose down --rmi all
