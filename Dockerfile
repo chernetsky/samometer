@@ -6,6 +6,8 @@ WORKDIR /usr/samometer
 # не менялся, то обновления не будет
 COPY package*.json ./
 
+COPY prisma ./prisma
+
 RUN npm ci
 
 # Добавляем все файлы в контейнер
@@ -13,4 +15,4 @@ COPY . .
 
 # ENTRYPOINT ["/sbin/tini", "--"]
 
-CMD ["sh", "-c", "node -v; npm run start"]
+CMD ["sh", "-c", "node -v; npm run db_push; npm run start_compose;"]

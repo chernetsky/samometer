@@ -1,0 +1,2 @@
+#!/usr/bin/bash
+docker run --name samometer-db --env-file .env -p 5432:5432 -d postgres:alpine3.14
