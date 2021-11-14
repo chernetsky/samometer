@@ -6,7 +6,7 @@ const port = 5000;
 const prisma = new PrismaClient();
 
 app.get('/', async (req, res) => { 
-  const newVisit = await prisma.visit.create({ data: {} });
+  const newVisit = await prisma.visit.create({ data: { ip: req.ip } });
   const visits = await prisma.visit.findMany();
 
   res.json({

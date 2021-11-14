@@ -11,7 +11,7 @@ generator client {
 model Visit {
   id   Int      @id @default(autoincrement())
   time DateTime @default(now())
-  // name      String?  @default("anonymous")
+  ip   String?
 
   @@map("visits")
 }
