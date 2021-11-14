@@ -9,12 +9,16 @@ app.get('/', async (req, res) => {
   const newVisit = await prisma.visit.create({ data: { ip: req.ip } });
   const visits = await prisma.visit.findMany();
 
-  res.json({
+  const response = {
     message: 'Hi from Samometer bot!',
     version: process.env.npm_package_version,
     now: new Date(),
     visits: visits.length
-  });
+  };
+
+  console.log(response);
+  
+  res.json(response);
 })
 
 app.listen(port, () => {
