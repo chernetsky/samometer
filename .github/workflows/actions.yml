@@ -58,4 +58,4 @@ jobs:
           script: |
             cd ${{ secrets.SSH_DIR }}
             docker-compose down --rmi all
-            docker-compose --file .env up -d
+            docker-compose --env-file ./.env up -d
