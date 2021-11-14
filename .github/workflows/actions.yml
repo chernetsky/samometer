@@ -40,9 +40,6 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
 
-      # - name: Image digest
-      #   run: echo ${{ steps.docker_build.outputs.digest }}
-
       - name: Publish remote
         uses: nogsantos/scp-deploy@master
         with:
@@ -59,6 +56,6 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd samometer
+            cd ${{ secrets.SSH_DIR }}
             docker-compose down --rmi all
-            docker-compose up -d
+            docker-compose --file .env up -d
