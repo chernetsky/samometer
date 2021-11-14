@@ -1,26 +1,12 @@
-const express = require('express');
-const { PrismaClient } = require('@prisma/client');
+const { Telegraf } = require('telegraf')
 
-const app = express();
-const port = 5000;
-const prisma = new PrismaClient();
+const bot = new Telegraf(process.env.BOT_TOKEN)
+bot.start((ctx) => ctx.reply('Welcome'))
+bot.help((ctx) => ctx.reply('Send me a sticker'))
+bot.on('sticker', (ctx) => ctx.reply('👍'))
+bot.hears('hi', (ctx) => ctx.reply('Hey there'))
+bot.launch()
 
-app.get('/', async (req, res) => { 
-  const newVisit = await prisma.visit.create({ data: { ip: req.ip } });
-  const visits = await prisma.visit.findMany();
-
-  const response = {
-    message: 'Hi from Samometer bot!',
-    version: process.env.npm_package_version,
-    now: new Date(),
-    visits: visits.length
-  };
-
-  console.log(response);
-  
-  res.json(response);
-})
-
-app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`)
-})
+// Enable graceful stop
+process.once('SIGINT', () => bot.stop('SIGINT'))
+process.once('SIGTERM', () => bot.stop('SIGTERM'))
