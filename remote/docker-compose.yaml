@@ -4,6 +4,7 @@ services:
     image: chernetsky/samometer:latest
     environment:
       - DATABASE_URL
+      - BOT_TOKEN
     ports:
       - 5000:5000
     extra_hosts:
