@@ -4,9 +4,10 @@
   "description": "Better todo and habbits telegram bot",
   "main": "index.js",
   "scripts": {
-    "start": "POSTGRES_HOST=localhost node ./src/index.js",
-    "start_compose": "node ./src/index.js",
+    "dev": "POSTGRES_HOST=localhost ts-node ./src/index.ts",
+    "start": "ts-node ./src/index.ts",
     "db_push": "prisma db push --accept-data-loss",
+    "lint": "tslint -p tsconfig.json -c tslint.json",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -26,7 +27,11 @@
     "telegraf": "^4.4.2"
   },
   "devDependencies": {
+    "@types/node": "^16.11.7",
     "prisma": "^3.4.1",
+    "ts-node": "^10.4.0",
+    "tslint": "^6.1.3",
+    "tslint-config-airbnb": "^5.11.2",
     "typescript": "^4.4.4"
   }
 }

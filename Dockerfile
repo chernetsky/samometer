@@ -10,4 +10,4 @@ RUN npm ci
 
 COPY . .
 
-CMD ["sh", "-c", "node -v; npm run db_push; npm run start_compose;"]
+CMD ["sh", "-c", "node -v; npm run db_push; npm run start;"]

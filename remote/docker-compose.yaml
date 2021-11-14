@@ -5,8 +5,6 @@ services:
     environment:
       - DATABASE_URL
       - BOT_TOKEN
-    ports:
-      - 5000:5000
     extra_hosts:
       - host.docker.internal:host-gateway # даёт доступ к базе на localhost (host.docker.internal)
     stdin_open: true # docker run -i
