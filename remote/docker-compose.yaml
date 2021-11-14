@@ -2,7 +2,8 @@ version: "3.4"
 services:
   samometer:
     image: chernetsky/samometer:latest
-    # env_file: /home/graph/samometer/.env
+    environment:
+      - DATABASE_URL
     ports:
       - 5000:5000
     extra_hosts:
