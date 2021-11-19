@@ -1,16 +1,19 @@
-const { Telegraf } = require('telegraf')
+import { Bot } from 'grammy';
 
-const bot = new Telegraf(process.env.BOT_TOKEN)
-bot.start((ctx) => ctx.reply('Welcome'))
-bot.help((ctx) => ctx.reply('Send me a sticker'))
-bot.on('sticker', (ctx) => ctx.reply('👍'))
+const bot = new Bot(process.env.BOT_TOKEN);
 
-bot.hears('hi', (ctx) => ctx.reply('Hey there at ' + new Date()))
-bot.hears(/ping/i, (ctx) => ctx.reply('pong'))
-bot.hears(/king/i, (ctx) => ctx.reply('kong'))
+// React to /start command
+bot.command('start', ctx => ctx.reply('Welcome! Up and running.'));
 
-bot.launch()
+bot.command('hello', ctx => ctx.reply('World!'));
+
+bot.hears(/^ping|пинг$/i, ctx => ctx.reply('pong'));
+bot.hears(/^king|кинг$/i, ctx => ctx.reply('kong'));
+
+bot.on('message', ctx => ctx.reply(String(new Date())));
+
+bot.start();
 
 // Enable graceful stop
-process.once('SIGINT', () => bot.stop('SIGINT'))
-process.once('SIGTERM', () => bot.stop('SIGTERM'))
+process.once('SIGINT', () => bot.stop());
+process.once('SIGTERM', () => bot.stop());
