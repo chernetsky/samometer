@@ -1,4 +1,5 @@
 import { Bot } from 'grammy';
+import { getPong } from './utils';
 
 const bot = new Bot(process.env.BOT_TOKEN);
 
@@ -7,10 +8,9 @@ bot.command('start', ctx => ctx.reply('Welcome! Up and running.'));
 
 bot.command('hello', ctx => ctx.reply('World!'));
 
-bot.hears(/^ping|пинг$/i, ctx => ctx.reply('pong'));
-bot.hears(/^king|кинг$/i, ctx => ctx.reply('kong'));
+bot.hears(/^(ping|пинг|king|кинг)$/i, ctx => ctx.reply(getPong(ctx.match[1])));
 
-bot.on('message', ctx => ctx.reply(String(new Date())));
+// bot.on('message', ctx => ctx.reply(String(new Date())));
 
 bot.start();
 
