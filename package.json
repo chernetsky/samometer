@@ -7,6 +7,7 @@
     "dev": "POSTGRES_HOST=localhost ts-node ./src/index.ts",
     "start": "ts-node ./src/index.ts",
     "db_push": "prisma db push --accept-data-loss",
+    "db_push_dev": "POSTGRES_HOST=localhost prisma db push --accept-data-loss",
     "lint": "tslint -p tsconfig.json -c tslint.json",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

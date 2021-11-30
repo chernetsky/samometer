@@ -8,10 +8,26 @@ generator client {
   binaryTargets = ["native"]
 }
 
-model Visit {
-  id   Int      @id @default(autoincrement())
-  time DateTime @default(now())
-  ip   String?
+model List {
+  id        Int      @id @default(autoincrement())
+  name      String
+  tracking  Boolean  @default(true)
+  custom    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  deleted   Boolean  @default(false)
+  deals     Deal[]
 
-  @@map("visits")
+  @@map("lists")
+}
+
+model Deal {
+  id        Int      @id @default(autoincrement())
+  name      String
+  list      List     @relation(fields: [listId], references: [id])
+  listId    Int
+  createdAt DateTime @default(now())
+  doneAt    DateTime
+  deleted   Boolean  @default(false)
+
+  @@map("deals")
 }

@@ -1,4 +1,4 @@
-import { PINGS } from './constants';
+import { PINGS } from '../constants';
 
 export function getPong(rawPing: string): string | null {
   const ping: symbol = Symbol.for(rawPing.toLocaleLowerCase());
