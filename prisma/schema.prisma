@@ -22,13 +22,13 @@ model List {
 }
 
 model Deal {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   name      String
-  list      List     @relation(fields: [listId], references: [id])
+  list      List      @relation(fields: [listId], references: [id])
   listId    Int
-  createdAt DateTime @default(now())
-  doneAt    DateTime
-  deleted   Boolean  @default(false)
+  createdAt DateTime  @default(now())
+  doneAt    DateTime?
+  deleted   Boolean   @default(false)
 
   @@map("deals")
 }

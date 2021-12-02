@@ -1,12 +1,21 @@
 import db from '../providers/db';
-import { Prisma, PrismaClient } from '@prisma/client';
-import { LIST_SPECIAL_DESCRIPTORS } from '../constants';
+import { List, Prisma, PrismaClient } from '@prisma/client';
+import { LIST_SPECIAL, LIST_SPECIAL_DESCRIPTORS } from '../constants';
 
 class ListRepository {
   listModel: Prisma.ListDelegate<Prisma.RejectOnNotFound | Prisma.RejectPerOperation>;
 
   constructor(dbClient: PrismaClient) {
     this.listModel = dbClient.list;
+  }
+
+  async getCurrentList(userId: number): Promise<List> {
+    return this.listModel.findFirst({
+      where: {
+        userId,
+        specialId: LIST_SPECIAL.TODAY,
+      },
+    });
   }
 
   async createSpecialList(userId: number, specialId: string) {
@@ -17,6 +26,7 @@ class ListRepository {
           userId,
           specialId,
           name: LIST_SPECIAL_DESCRIPTORS[specialId].name,
+          tracking: false, // По специальным спискам статистику не собираем
         },
       });
     }

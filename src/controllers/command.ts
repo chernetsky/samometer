@@ -8,6 +8,7 @@ const log = logger.log;
 class CommandController {
   async start(ctx: Context) {
     const result = await listRepository.createSpecialList(ctx.from.id, LIST_SPECIAL.TODAY);
+
     return ctx.reply(result ? 'Создан список Сегодня' : 'Что делаем сегодня?');
   }
 }

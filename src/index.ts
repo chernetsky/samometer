@@ -1,10 +1,15 @@
 import { Bot, GrammyError, HttpError, InlineKeyboard, Keyboard } from 'grammy';
 import { getPong } from './utils/utils';
-import commands from './controllers/commands';
+import command from './controllers/command';
+import text from './controllers/text';
 
 const bot = new Bot(process.env.BOT_TOKEN);
 
-bot.command('start', ctx => commands.start(ctx));
+bot.hears(/^(ping|пинг|king|кинг)$/i, ctx => ctx.reply(getPong(ctx.match[1])));
+
+bot.command('start', command.start);
+
+bot.on('message', text.message);
 
 // // Any button of any inline keyboard:
 // bot.on('callback_query:data', (ctx, next) => {
@@ -56,10 +61,6 @@ bot.command('start', ctx => commands.start(ctx));
 //   //   },
 //   // });
 // });
-
-bot.hears(/^(ping|пинг|king|кинг)$/i, ctx => ctx.reply(getPong(ctx.match[1])));
-
-// bot.on('message', ctx => ctx.reply(String(new Date())));
 
 bot.catch((err) => {
   const ctx = err.ctx;
