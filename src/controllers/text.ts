@@ -1,14 +1,10 @@
 import { Context } from 'grammy';
-import listRepository from '../repositories/listRepository';
 import dealRepository from '../repositories/dealRepository';
-import logger from '../utils/logger';
-
-const log = logger.log;
+import { getCurrentList } from '../utils';
 
 class TextController {
   async message(ctx: Context) {
-    // todo: Брать список из сессии
-    const list = await listRepository.getCurrentList(ctx.from.id);
+    const list = await getCurrentList(ctx.from.id);
 
     const { message: { text } } = ctx;
     if (text) {

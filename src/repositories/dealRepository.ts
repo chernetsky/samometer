@@ -8,6 +8,12 @@ class DealRepository {
     this.dealModel = dbClient.deal;
   }
 
+  async getDealsByListId(listId: number) {
+    return this.dealModel.findMany({
+      where: { listId, deleted: false },
+    });
+  }
+
   async addDeal(dealData: { name: string, listId: number }) {
     const { name, listId } = dealData;
     return this.dealModel.create({
