@@ -1,5 +1,5 @@
 import { List } from '@prisma/client';
-import dealRepository from '../repositories/dealRepository';
+import dealRepository from '../repositories/deal.repository';
 import { InlineKeyboard } from 'grammy';
 
 class ListView {

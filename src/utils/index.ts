@@ -1,4 +1,4 @@
-import listRepository from '../repositories/listRepository';
+import listRepository from '../repositories/list.repository';
 import { PINGS } from '../constants';
 import { List } from '@prisma/client';
 

@@ -1,10 +1,16 @@
-import { Context } from 'grammy';
-import listRepository from '../repositories/listRepository';
+import { Bot, Context } from 'grammy';
+import listRepository from '../repositories/list.repository';
 import { LIST_SPECIAL } from '../constants';
 import listView from '../views/list.view';
 import { getCurrentList } from '../utils';
 
-class CommandController {
+class CommandsController {
+  init(bot: Bot) {
+    bot.command('start', this.start.bind(this));
+
+    bot.command('list', this.list.bind(this));
+  }
+
   async start(ctx: Context) {
     const result = await listRepository.createSpecialList(ctx.from.id, LIST_SPECIAL.TODAY);
 
@@ -19,4 +25,4 @@ class CommandController {
   }
 }
 
-export default new CommandController();
+export default new CommandsController();
