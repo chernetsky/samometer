@@ -1,10 +1,22 @@
-import { Bot, GrammyError, HttpError } from 'grammy';
+import { Bot, GrammyError, HttpError, session } from 'grammy';
 import { getPong } from './utils';
 import commandsController from './controllers/commands.controller';
 import listController from './controllers/list.controller';
+import { SamometerContext, SessionData } from 'session/context';
+// import { Bot, Context, session, SessionFlavor } from 'grammy';
+function bootstrap() {
+  const bot = new Bot<SamometerContext>(process.env.BOT_TOKEN);
 
-function init() {
-  const bot = new Bot(process.env.BOT_TOKEN);
+  bot.use(
+    session({
+      initial(): SessionData {
+        return {
+          listId: null,
+          messageId: null,
+        };
+      },
+    }),
+  );
 
   bot.hears(/^(ping|пинг|king|кинг)$/i, ctx => ctx.reply(getPong(ctx.match[1])));
 
@@ -35,4 +47,4 @@ function init() {
   process.once('SIGTERM', () => bot.stop());
 }
 
-init();
+bootstrap();

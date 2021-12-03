@@ -32,3 +32,8 @@ model Deal {
 
   @@map("deals")
 }
+
+// model Session {
+//   id String @id
+
+// }

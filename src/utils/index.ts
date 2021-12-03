@@ -1,6 +1,7 @@
 import listRepository from '../repositories/list.repository';
 import { PINGS } from '../constants';
 import { List } from '@prisma/client';
+import { SamometerContext } from 'session/context';
 
 export function getPong(rawPing: string): string | null {
   const ping: symbol = Symbol.for(rawPing.toLocaleLowerCase());
@@ -8,9 +9,6 @@ export function getPong(rawPing: string): string | null {
   return PINGS[ping] || null;
 }
 
-/**
- * todo: Заглушка. Потом будет из сессии.
- */
-export function getCurrentList(userId: number): Promise<List> {
-  return listRepository.getCurrentList(userId);
+export async function getCurrentListId(ctx: SamometerContext): Promise<number> {
+  return ctx.session.listId || listRepository.getCurrentListId(ctx.from.id);
 }

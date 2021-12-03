@@ -9,6 +9,26 @@ class ListRepository {
     this.listModel = dbClient.list;
   }
 
+  async getListById(listId: number): Promise<List> {
+    return this.listModel.findUnique({
+      where: {
+        id: listId,
+      },
+    });
+  }
+
+  async getCurrentListId(userId: number): Promise<number> {
+    const result = await this.listModel.findFirst({
+      select: { id: true },
+      where: {
+        userId,
+        specialId: LIST_SPECIAL.TODAY,
+      },
+    });
+
+    return result.id;
+  }
+
   async getCurrentList(userId: number): Promise<List> {
     return this.listModel.findFirst({
       where: {
