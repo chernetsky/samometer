@@ -17,7 +17,7 @@ class ListRepository {
     });
   }
 
-  async getCurrentListId(userId: number): Promise<number> {
+  async getCurrentListId(userId: number): Promise<number | null> {
     const result = await this.listModel.findFirst({
       select: { id: true },
       where: {
@@ -26,7 +26,7 @@ class ListRepository {
       },
     });
 
-    return result.id;
+    return result?.id || null;
   }
 
   async getCurrentList(userId: number): Promise<List> {

@@ -1,9 +1,8 @@
 import { Bot, InlineKeyboard } from 'grammy';
 import listView from '../views/list.view';
 import dealRepository from '../repositories/deal.repository';
-import { getCurrentListId } from '../utils';
-import { SamometerContext } from '../session/context';
 import commandsController from './commands.controller';
+import { SamometerContext } from './session.controller';
 
 class ListController {
   init(bot: Bot) {
@@ -13,27 +12,22 @@ class ListController {
   }
 
   async addDeal(ctx: SamometerContext) {
-    const listId = await getCurrentListId(ctx);
     const { message: { text } } = ctx;
-
-    if (!listId || !text) {
-      return ctx.reply('Не выбран список или нет текста...');
+    if (!text) {
+      return ctx.reply('Нет текста...');
     }
 
     // Добавляем дело в список
-    await dealRepository.addDeal({ listId, name: text });
+    await dealRepository.addDeal({
+      listId: ctx.session.listId,
+      name: text,
+    });
 
     // Удаляем текущее сообщение
     await ctx.deleteMessage();
 
-    if (ctx.session.messageId) {
-      // Обновляем сообщение со списком
-      const [, markup] = await listView.render(listId);
-      return ctx.api.editMessageReplyMarkup(ctx.chat.id, ctx.session.messageId, markup);
-    }
-
-    // Заново отрисовываем список
-    return commandsController.list(ctx);
+    // Обновляем список
+    return this.updateList(ctx);
   }
 
   async doneDeal(ctx: SamometerContext) {
@@ -41,23 +35,11 @@ class ListController {
 
     const [, dealId] = ctx.match;
 
-    // const listRender = await listView.render(list);
+    // Меняем статус
+    await dealRepository.changeDone(Number(dealId), true);
 
-    const keyboard = new InlineKeyboard();
-    Array(Math.round(Math.random() * 10)).fill(0).forEach((_, i) => keyboard.text(`done-${i}`, `done-${i}`).row());
-
-    // try {
-    //   console.log('!!!');
-    //   const resp = await ctx.editMessageReplyMarkup({
-    //     reply_markup: keyboard,
-    //   });
-    //   console.log(resp);
-    //   return;
-    // } catch (err) {
-    //   console.log('catch: ', err);
-    // }
-
-    return ctx.reply(`done: ${dealId}`);
+    // Обновляем список
+    return this.updateList(ctx);
   }
 
   async undoneDeal(ctx: SamometerContext) {
@@ -65,7 +47,22 @@ class ListController {
 
     const [, dealId] = ctx.match;
 
-    return ctx.reply(`undone: ${dealId}`);
+    // Меняем статус
+    await dealRepository.changeDone(Number(dealId), false);
+
+    // Обновляем список
+    return this.updateList(ctx);
+  }
+
+  async updateList(ctx: SamometerContext) {
+    if (ctx.session.messageId) {
+      // Обновляем сообщение со списком
+      const [, markup] = await listView.render(ctx.session.listId);
+      return ctx.api.editMessageReplyMarkup(ctx.chat.id, ctx.session.messageId, markup);
+    }
+
+    // Заново отрисовываем список
+    return commandsController.list(ctx);
   }
 }
 

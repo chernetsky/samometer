@@ -11,6 +11,9 @@ class DealRepository {
   async getDealsByListId(listId: number) {
     return this.dealModel.findMany({
       where: { listId, deleted: false },
+      orderBy: {
+        createdAt: 'asc',
+      },
     });
   }
 
@@ -20,6 +23,17 @@ class DealRepository {
       data: {
         name,
         listId,
+      },
+    });
+  }
+
+  async changeDone(dealId: number, done: boolean) {
+    return this.dealModel.update({
+      where: {
+        id: dealId,
+      },
+      data: {
+        doneAt: done ? new Date() : null,
       },
     });
   }

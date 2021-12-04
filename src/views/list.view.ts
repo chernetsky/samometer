@@ -12,7 +12,7 @@ class ListView {
       const deals = await dealRepository.getDealsByListId(listId);
 
       deals.forEach(d => listButtons.text(
-        String(d.name),
+        `${d.doneAt ? 'V ' : '  '}${d.name}`,
         `${d.doneAt ? 'undone' : 'done'}-${d.id}`,
       ).row());
 
