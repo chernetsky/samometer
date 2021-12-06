@@ -8,16 +8,22 @@ class ListView {
     const list = await listRepository.getListById(listId);
 
     if (list) {
-      const listButtons = new InlineKeyboard();
+      const listKeyboard = new InlineKeyboard();
       const deals = await dealRepository.getDealsByListId(listId);
 
-      deals.forEach(d => listButtons.text(
+      deals.forEach(d => listKeyboard.text(
         `${d.doneAt ? 'V ' : '  '}${d.name}`,
         `${d.doneAt ? 'undone' : 'done'}-${d.id}`,
       ).row());
 
-      return [list.name, { reply_markup: listButtons }];
+      this.appendServiceButtons(listKeyboard);
+
+      return [list.name, { reply_markup: listKeyboard }];
     }
+  }
+
+  appendServiceButtons(keyboard: InlineKeyboard) {
+    return keyboard.text('🗑    Удалить сделанное', 'clear-list').row();
   }
 }
 

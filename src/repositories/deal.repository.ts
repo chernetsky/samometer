@@ -37,6 +37,20 @@ class DealRepository {
       },
     });
   }
+
+  async setDeleted(listId: number) {
+    return this.dealModel.updateMany({
+      where: {
+        listId,
+        doneAt: {
+          not: null,
+        },
+      },
+      data: {
+        deleted: true,
+      },
+    });
+  }
 }
 
 export default new DealRepository(db.client);

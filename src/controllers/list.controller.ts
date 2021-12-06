@@ -9,6 +9,7 @@ class ListController {
     bot.on('message', this.addDeal.bind(this));
     bot.callbackQuery(/^done-(\d+)$/, this.doneDeal.bind(this));
     bot.callbackQuery(/^undone-(\d+)$/, this.undoneDeal.bind(this));
+    bot.callbackQuery('clear-list', this.clear.bind(this));
   }
 
   async addDeal(ctx: SamometerContext) {
@@ -49,6 +50,16 @@ class ListController {
 
     // Меняем статус
     await dealRepository.changeDone(Number(dealId), false);
+
+    // Обновляем список
+    return this.updateList(ctx);
+  }
+
+  async clear(ctx: SamometerContext) {
+    ctx.answerCallbackQuery();
+
+    // Меняем статус
+    await dealRepository.setDeleted(ctx.session.listId);
 
     // Обновляем список
     return this.updateList(ctx);
