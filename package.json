@@ -1,6 +1,6 @@
 {
   "name": "samometer",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "Better todo and habbits telegram bot",
   "main": "index.js",
   "scripts": {
