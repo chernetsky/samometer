@@ -4,6 +4,12 @@ import dealRepository from '../repositories/deal.repository';
 import listRepository from '../repositories/list.repository';
 
 class ListView {
+  maxDealLength: number;
+
+  constructor() {
+    this.maxDealLength = 150; // ;115;
+  }
+
   async render(listId: number): Promise<[string, { reply_markup: InlineKeyboard }]> {
     const list = await listRepository.getListById(listId);
 
@@ -12,7 +18,7 @@ class ListView {
       const deals = await dealRepository.getDealsByListId(listId);
 
       deals.forEach(d => listKeyboard.text(
-        `${d.doneAt ? 'V ' : '  '}${d.name}`,
+        this._renderDealText.bind(this)(d.name, d.doneAt),
         `${d.doneAt ? 'undone' : 'done'}-${d.id}`,
       ).row());
 
@@ -24,6 +30,14 @@ class ListView {
 
   appendServiceButtons(keyboard: InlineKeyboard) {
     return keyboard.text('🗑    Очистить список    🗑', 'clear-list').row();
+  }
+
+  _renderDealText(text: string, done: boolean): string {
+    let result = done ? 'V' : '. '; // '☑️'
+
+    result += `${' '.repeat(20)}${text}${' '.repeat(this.maxDealLength)}.`;
+
+    return result;
   }
 }
 
