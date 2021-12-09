@@ -35,7 +35,8 @@ class ListView {
   _renderDealText(text: string, done: boolean): string {
     let result = done ? 'V' : '. '; // '☑️'
 
-    result += `${' '.repeat(20)}${text}${' '.repeat(this.maxDealLength)}.`;
+    const separator = '    .   ';
+    result += `${separator.repeat(2)}${text}${separator.repeat(this.maxDealLength)}.`;
 
     return result;
   }
