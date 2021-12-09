@@ -8,6 +8,7 @@ class ErrorsController {
     });
 
     bot.catch((err) => {
+      console.log('catch!!');
       const ctx = err.ctx;
       console.error(`Error while handling update ${ctx.update.update_id}:`);
       const e = err.error;
@@ -18,6 +19,8 @@ class ErrorsController {
       } else {
         console.error('Unknown error:', e);
       }
+      ctx.answerCallbackQuery();
+      return ctx.reply('Бот сломался :(');
     });
   }
 }

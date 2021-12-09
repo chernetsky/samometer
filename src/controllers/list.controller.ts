@@ -1,4 +1,4 @@
-import { Bot, InlineKeyboard } from 'grammy';
+import { Bot, InlineKeyboard, NextFunction } from 'grammy';
 import listView from '../views/list.view';
 import dealRepository from '../repositories/deal.repository';
 import commandsController from './commands.controller';
@@ -7,9 +7,9 @@ import { SamometerContext } from './session.controller';
 class ListController {
   init(bot: Bot) {
     bot.on('message', this.addDeal.bind(this));
-    bot.callbackQuery(/^done-(\d+)$/, this.doneDeal.bind(this));
-    bot.callbackQuery(/^undone-(\d+)$/, this.undoneDeal.bind(this));
-    bot.callbackQuery('clear-list', this.clear.bind(this));
+    bot.callbackQuery(/^done-(\d+)$/, this.isOld.bind(this), this.doneDeal.bind(this));
+    bot.callbackQuery(/^undone-(\d+)$/, this.isOld.bind(this), this.undoneDeal.bind(this));
+    bot.callbackQuery('clear-list', this.isOld.bind(this), this.clear.bind(this));
   }
 
   async addDeal(ctx: SamometerContext) {
@@ -29,6 +29,18 @@ class ListController {
 
     // Обновляем список
     return this.updateList(ctx);
+  }
+
+  /**
+   * Если действия производятся со старым сообщением в чате,
+   * то это сообщение удаляется, и действия передаются актуальному сообщению.
+   */
+  isOld(ctx: SamometerContext, next: NextFunction) {
+    if (ctx.msg.message_id !== ctx.session.messageId) {
+      // console.log('old message', ctx.msg.message_id, ctx.session.messageId);
+      ctx.api.deleteMessage(ctx.chat.id, ctx.msg.message_id).catch(() => { /* Не удаляется */ });
+    }
+    next();
   }
 
   async doneDeal(ctx: SamometerContext) {
@@ -69,7 +81,8 @@ class ListController {
     if (ctx.session.messageId) {
       // Обновляем сообщение со списком
       const [, markup] = await listView.render(ctx.session.listId);
-      return ctx.api.editMessageReplyMarkup(ctx.chat.id, ctx.session.messageId, markup);
+      return ctx.api.editMessageReplyMarkup(ctx.chat.id, ctx.session.messageId, markup)
+        .catch(() => { /* Список не поменялся */ });
     }
 
     // Заново отрисовываем список

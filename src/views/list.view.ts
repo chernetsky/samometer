@@ -23,7 +23,7 @@ class ListView {
   }
 
   appendServiceButtons(keyboard: InlineKeyboard) {
-    return keyboard.text('🗑    Удалить сделанное    🗑', 'clear-list').row();
+    return keyboard.text('🗑    Очистить список    🗑', 'clear-list').row();
   }
 }
 
