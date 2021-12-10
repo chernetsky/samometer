@@ -6,7 +6,11 @@
   ],
   "rules": {
     "no-console": false,
-    "function-name": false
+    "function-name": false,
+    "max-line-length": [
+      true,
+      120
+    ]
   },
   "rulesDirectory": []
 }

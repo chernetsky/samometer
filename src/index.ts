@@ -2,7 +2,7 @@ import { Bot } from 'grammy';
 
 import commandsController from './controllers/commands.controller';
 import errorsController from './controllers/errors.controller';
-import listController from './controllers/list.controller';
+import dealsController from './controllers/deals.controller';
 import sessionController, { SamometerContext } from './controllers/session.controller';
 
 function bootstrap() {
@@ -11,7 +11,7 @@ function bootstrap() {
   [
     sessionController,
     commandsController,
-    listController,
+    dealsController,
     errorsController,
   ].forEach(c => c.init(bot));
 

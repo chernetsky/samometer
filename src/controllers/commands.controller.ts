@@ -1,7 +1,7 @@
 import { Bot } from 'grammy';
 import listRepository from '../repositories/list.repository';
 import { LIST_SPECIAL } from '../constants';
-import listView from '../views/list.view';
+import dealsView from '../views/deals.view';
 import { SamometerContext } from './session.controller';
 
 class CommandsController {
@@ -20,7 +20,7 @@ class CommandsController {
   }
 
   async list(ctx: SamometerContext) {
-    const listRender = await listView.render(ctx.session.listId);
+    const listRender = await dealsView.render(ctx.session.listId);
 
     const response = await ctx.reply.apply(ctx, listRender);
 

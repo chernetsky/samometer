@@ -1,12 +1,21 @@
-import { Bot, Context, session, SessionFlavor } from 'grammy';
+import { Bot, Context, NextFunction, session, SessionFlavor } from 'grammy';
 import listRepository from '../repositories/list.repository';
 
+enum Mode {
+  deals = 'deals',
+  lists = 'lists',
+}
 interface SessionData {
   listId: number;
   messageId: number;
+  mode: Mode;
 }
 
-export type SamometerContext = Context & SessionFlavor<SessionData>;
+interface SamometerFlavor {
+  switchMode: boolean;
+}
+
+export type SamometerContext = Context & SessionFlavor<SessionData> & SamometerFlavor;
 
 class SessionController {
   init(bot: Bot) {
@@ -16,12 +25,14 @@ class SessionController {
           return {
             listId: null,
             messageId: null,
+            mode: Mode.deals,
           };
         },
       }),
     );
 
     bot.use(this.getListId.bind(this));
+    bot.callbackQuery(/^mode-(deals|lists)$/, this.changeMode.bind(this));
 
     bot.command('deb', this.deb.bind(this));
   }
@@ -35,6 +46,19 @@ class SessionController {
 
       ctx.session.listId = listId;
     }
+
+    next();
+  }
+
+  async changeMode(ctx: SamometerContext, next: NextFunction) {
+    console.log(ctx.match);
+    const [, ctxMode] = ctx.match;
+
+    const mode: Mode = (Mode as any)[ctxMode];
+
+    ctx.session.mode = mode;
+
+    ctx.switchMode = true;
 
     next();
   }

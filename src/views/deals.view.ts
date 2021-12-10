@@ -3,14 +3,14 @@ import { InlineKeyboard } from 'grammy';
 import dealRepository from '../repositories/deal.repository';
 import listRepository from '../repositories/list.repository';
 
-class ListView {
+class DealsView {
   maxDealLength: number;
 
   constructor() {
     this.maxDealLength = 150; // ;115;
   }
 
-  async render(listId: number): Promise<[string, { reply_markup: InlineKeyboard }]> {
+  async render(listId: number): Promise<[string, { reply_markup: InlineKeyboard, parse_mode: string }]> {
     const list = await listRepository.getListById(listId);
 
     if (list) {
@@ -24,12 +24,20 @@ class ListView {
 
       this.appendServiceButtons(listKeyboard);
 
-      return [list.name, { reply_markup: listKeyboard }];
+      // tslint:disable-next-line: max-line-length
+      return [this._renderTitle(list.name), { reply_markup: listKeyboard, parse_mode: 'MarkdownV2' }];
     }
   }
 
   appendServiceButtons(keyboard: InlineKeyboard) {
-    return keyboard.text('🗑    Очистить список    🗑', 'clear-list').row();
+    return keyboard
+      .text('🆗        Очистить', 'clear-list')
+      .text('Списки        ⤴️', 'mode-lists')
+      .row();
+  }
+
+  _renderTitle(listName: string): string {
+    return `Список дел: *${listName}*`;
   }
 
   _renderDealText(text: string, done: boolean): string {
@@ -42,4 +50,4 @@ class ListView {
   }
 }
 
-export default new ListView();
+export default new DealsView();
