@@ -17,6 +17,18 @@ class ListRepository {
     });
   }
 
+  async getListsByUserId(userId: number): Promise<List[]> {
+    return this.listModel.findMany({
+      where: {
+        userId,
+        deleted: false,
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    });
+  }
+
   async getCurrentListId(userId: number): Promise<number | null> {
     const result = await this.listModel.findFirst({
       select: { id: true },
@@ -40,7 +52,6 @@ class ListRepository {
 
   async createSpecialList(userId: number, specialId: string) {
     if (await this.listModel.count({ where: { userId, specialId } }) === 0) {
-      // console.log(`Create special list ${specialId} for ${userId}`);
       return this.listModel.create({
         data: {
           userId,

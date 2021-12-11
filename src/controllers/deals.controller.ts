@@ -6,20 +6,17 @@ import { SamometerContext } from './session.controller';
 
 class DealsController {
   init(bot: Bot) {
-    bot.use(this.checkSwitchMode.bind(this));
+    bot.callbackQuery(/^mode-deals(-\d+)?/, this.changeMode.bind(this));
+
     bot.on('message', this.addDeal.bind(this));
     bot.callbackQuery(/^done-(\d+)$/, this.isOld.bind(this), this.doneDeal.bind(this));
     bot.callbackQuery(/^undone-(\d+)$/, this.isOld.bind(this), this.undoneDeal.bind(this));
     bot.callbackQuery('clear-list', this.isOld.bind(this), this.clear.bind(this));
   }
 
-  checkSwitchMode(ctx: SamometerContext, next: NextFunction) {
-    if (ctx.switchMode && ctx.session.mode === 'deals') {
-      // Рисуем список, потому что переключились на Список дел
-      return this.updateList(ctx);
-    }
-
-    next();
+  async changeMode(ctx: SamometerContext) {
+    // Рисуем список, потому что переключились на Список дел
+    return this._updateList(ctx);
   }
 
   async addDeal(ctx: SamometerContext, next: NextFunction) {
@@ -42,7 +39,7 @@ class DealsController {
     await ctx.deleteMessage();
 
     // Обновляем список
-    return this.updateList(ctx);
+    return this._updateList(ctx);
   }
 
   /**
@@ -61,7 +58,6 @@ class DealsController {
   }
 
   async doneDeal(ctx: SamometerContext) {
-    console.log(ctx.switchMode);
     ctx.answerCallbackQuery();
 
     const [, dealId] = ctx.match;
@@ -70,11 +66,10 @@ class DealsController {
     await dealRepository.changeDone(Number(dealId), true);
 
     // Обновляем список
-    return this.updateList(ctx);
+    return this._updateList(ctx);
   }
 
   async undoneDeal(ctx: SamometerContext) {
-    console.log(ctx.switchMode);
     ctx.answerCallbackQuery();
 
     const [, dealId] = ctx.match;
@@ -83,7 +78,7 @@ class DealsController {
     await dealRepository.changeDone(Number(dealId), false);
 
     // Обновляем список
-    return this.updateList(ctx);
+    return this._updateList(ctx);
   }
 
   async clear(ctx: SamometerContext) {
@@ -93,10 +88,10 @@ class DealsController {
     await dealRepository.setDeleted(ctx.session.listId);
 
     // Обновляем список
-    return this.updateList(ctx);
+    return this._updateList(ctx);
   }
 
-  async updateList(ctx: SamometerContext) {
+  async _updateList(ctx: SamometerContext) {
     if (ctx.session.messageId) {
       // Обновляем сообщение со списком
       const [, markup] = await dealsView.render(ctx.session.listId);

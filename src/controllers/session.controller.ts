@@ -11,11 +11,7 @@ interface SessionData {
   mode: Mode;
 }
 
-interface SamometerFlavor {
-  switchMode: boolean;
-}
-
-export type SamometerContext = Context & SessionFlavor<SessionData> & SamometerFlavor;
+export type SamometerContext = Context & SessionFlavor<SessionData>;
 
 class SessionController {
   init(bot: Bot) {
@@ -31,8 +27,9 @@ class SessionController {
       }),
     );
 
+    bot.callbackQuery(/^mode-(deals|lists)(-(\d)+)?$/, this.changeMode.bind(this));
+
     bot.use(this.getListId.bind(this));
-    bot.callbackQuery(/^mode-(deals|lists)$/, this.changeMode.bind(this));
 
     bot.command('deb', this.deb.bind(this));
   }
@@ -50,15 +47,30 @@ class SessionController {
     next();
   }
 
+  /**
+   * Переключение между режимами
+   */
   async changeMode(ctx: SamometerContext, next: NextFunction) {
-    console.log(ctx.match);
-    const [, ctxMode] = ctx.match;
+    ctx.answerCallbackQuery();
+
+    const [, ctxMode, _, listId] = ctx.match;
+
+    if (!isNaN(Number(listId))) {
+      ctx.session.listId = Number(listId);
+    }
 
     const mode: Mode = (Mode as any)[ctxMode];
 
     ctx.session.mode = mode;
 
-    ctx.switchMode = true;
+    if (ctx.msg.message_id !== ctx.session.messageId) {
+      await ctx.api.deleteMessage(ctx.chat.id, ctx.msg.message_id).catch(() => { /* Ошибка удаления */ });
+    }
+
+    if (ctx.session.messageId) {
+      await ctx.api.deleteMessage(ctx.chat.id, ctx.session.messageId).catch(() => { /* Ошибка удаления */ });
+      ctx.session.messageId = null;
+    }
 
     next();
   }

@@ -8,7 +8,6 @@ class ErrorsController {
     });
 
     bot.catch((err) => {
-      console.log('catch!!');
       const ctx = err.ctx;
       console.error(`Error while handling update ${ctx.update.update_id}:`);
       const e = err.error;

@@ -14,6 +14,7 @@ class CommandsController {
    * Создание дефолтных списков при старте
    */
   async start(ctx: SamometerContext) {
+    // todo: Переделат на switchMode: true
     const result = await listRepository.createSpecialList(ctx.from.id, LIST_SPECIAL.TODAY);
 
     return ctx.reply(result ? 'Создан список Сегодня' : 'Что сегодня делаем?');

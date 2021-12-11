@@ -1,23 +1,37 @@
 import { Bot, InlineKeyboard, NextFunction } from 'grammy';
-import dealsView from '../views/deals.view';
+import listsView from '../views/lists.view';
 import dealRepository from '../repositories/deal.repository';
 import commandsController from './commands.controller';
 import { SamometerContext } from './session.controller';
 
 class ListsController {
   init(bot: Bot) {
-    bot.use(this.checkSwitchMode.bind(this));
+    bot.callbackQuery('mode-lists', this.changeMode.bind(this));
   }
 
-  checkSwitchMode(ctx: SamometerContext, next: NextFunction) {
-    if (ctx.switchMode && ctx.session.mode === 'lists') {
-      // Рисуем список, потому что переключились на Список дел
-      return this.updateList(ctx);
+  async changeMode(ctx: SamometerContext, next: NextFunction) {
+    // Рисуем список, потому что переключились на Список дел
+    return this._updateList(ctx);
+  }
+
+  async _updateList(ctx: SamometerContext) {
+    const render = await listsView.render(ctx.from.id);
+    if (ctx.session.messageId) {
+      // Обновляем сообщение со списком
+      await ctx.api.editMessageReplyMarkup(ctx.chat.id, ctx.session.messageId, render[1])
+        .catch((err) => {
+          /* Список не поменялся */
+        });
+    } else {
+      const response = await ctx.reply.apply(ctx, render);
+
+      const { message_id } = response;
+
+      if (message_id) {
+        ctx.session.messageId = message_id;
+      }
     }
-
-    next();
   }
-
 }
 
 export default new ListsController();
