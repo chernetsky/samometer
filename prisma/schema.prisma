@@ -12,7 +12,7 @@ model List {
   id        Int      @id @default(autoincrement())
   userId    Int
   name      String
-  specialId String // Samometer special lists Id
+  specialId String? // Samometer special lists Id
   tracking  Boolean  @default(true)
   createdAt DateTime @default(now())
   deleted   Boolean  @default(false)

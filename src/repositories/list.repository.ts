@@ -3,22 +3,22 @@ import { List, Prisma, PrismaClient } from '@prisma/client';
 import { LIST_SPECIAL, LIST_SPECIAL_DESCRIPTORS } from '../constants';
 
 class ListRepository {
-  listModel: Prisma.ListDelegate<Prisma.RejectOnNotFound | Prisma.RejectPerOperation>;
+  model: Prisma.ListDelegate<Prisma.RejectOnNotFound | Prisma.RejectPerOperation>;
 
   constructor(dbClient: PrismaClient) {
-    this.listModel = dbClient.list;
+    this.model = dbClient.list;
   }
 
-  async getListById(listId: number): Promise<List> {
-    return this.listModel.findUnique({
+  async getListById(id: number): Promise<List> {
+    return this.model.findUnique({
       where: {
-        id: listId,
+        id,
       },
     });
   }
 
   async getListsByUserId(userId: number): Promise<List[]> {
-    return this.listModel.findMany({
+    return this.model.findMany({
       where: {
         userId,
         deleted: false,
@@ -30,7 +30,7 @@ class ListRepository {
   }
 
   async getCurrentListId(userId: number): Promise<number | null> {
-    const result = await this.listModel.findFirst({
+    const result = await this.model.findFirst({
       select: { id: true },
       where: {
         userId,
@@ -42,7 +42,7 @@ class ListRepository {
   }
 
   async getCurrentList(userId: number): Promise<List> {
-    return this.listModel.findFirst({
+    return this.model.findFirst({
       where: {
         userId,
         specialId: LIST_SPECIAL.TODAY,
@@ -50,9 +50,19 @@ class ListRepository {
     });
   }
 
+  async create(data: { name: string, userId: number }) {
+    const { name, userId } = data;
+    return this.model.create({
+      data: {
+        name,
+        userId,
+      },
+    });
+  }
+
   async createSpecialList(userId: number, specialId: string) {
-    if (await this.listModel.count({ where: { userId, specialId } }) === 0) {
-      return this.listModel.create({
+    if (await this.model.count({ where: { userId, specialId } }) === 0) {
+      return this.model.create({
         data: {
           userId,
           specialId,

@@ -5,10 +5,16 @@ import commandsController from './commands.controller';
 import { SamometerContext } from './session.controller';
 
 class DealsController {
+  private mode: string;
+
+  constructor() {
+    this.mode = 'deals';
+  }
+
   init(bot: Bot) {
     bot.callbackQuery(/^mode-deals(-\d+)?/, this.changeMode.bind(this));
 
-    bot.on('message', this.addDeal.bind(this));
+    bot.on('message', this.add.bind(this));
     bot.callbackQuery(/^done-(\d+)$/, this.isOld.bind(this), this.doneDeal.bind(this));
     bot.callbackQuery(/^undone-(\d+)$/, this.isOld.bind(this), this.undoneDeal.bind(this));
     bot.callbackQuery('clear-list', this.isOld.bind(this), this.clear.bind(this));
@@ -19,9 +25,9 @@ class DealsController {
     return this._updateList(ctx);
   }
 
-  async addDeal(ctx: SamometerContext, next: NextFunction) {
-    if (ctx.session.mode !== 'deals') {
-      next();
+  async add(ctx: SamometerContext, next: NextFunction) {
+    if (!this._checkMode(ctx)) {
+      return next();
     }
 
     const { message: { text } } = ctx;
@@ -40,6 +46,10 @@ class DealsController {
 
     // Обновляем список
     return this._updateList(ctx);
+  }
+
+  _checkMode(ctx: SamometerContext) {
+    return ctx.session.mode === this.mode;
   }
 
   /**
