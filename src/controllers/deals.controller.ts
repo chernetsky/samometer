@@ -32,7 +32,7 @@ class DealsController {
 
     const { message: { text } } = ctx;
     if (!text) {
-      return ctx.reply('Нет текста...');
+      return ctx.reply('Это не дело...');
     }
 
     // Добавляем дело в список

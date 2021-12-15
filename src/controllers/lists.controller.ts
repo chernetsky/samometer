@@ -24,7 +24,7 @@ class ListsController {
 
     const { message: { text } } = ctx;
     if (!text) {
-      return ctx.reply('Нет текста...');
+      return ctx.reply('Дайте название нового списка текстом...');
     }
 
     // Создаём новый список
