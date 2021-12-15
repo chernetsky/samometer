@@ -27,14 +27,38 @@ class SessionController {
       }),
     );
 
-    bot.callbackQuery(/^mode-(deals|lists)(-(\d)+)?$/, this.changeMode.bind(this));
+    bot.use(this.setListId.bind(this));
 
-    bot.use(this.getListId.bind(this));
+    bot.on('callback_query:data', this.buttonMiddleware.bind(this));
 
-    bot.command('deb', this.deb.bind(this));
+    bot.callbackQuery(/^mode-(deals|lists)(-(\d)+)?$/, this.setMode.bind(this));
+
+    bot.command('list', this.listCmd.bind(this));
+
+    bot.command('deb', this.debCmd.bind(this));
   }
 
-  async getListId(ctx: SamometerContext, next) {
+  /**
+   * Если действия производятся со старым сообщением в чате,
+   * то это сообщение удаляется, и действия передаются актуальному сообщению.
+   */
+  async buttonMiddleware(ctx: SamometerContext, next: NextFunction) {
+    ctx.answerCallbackQuery();
+
+    if (ctx.msg.message_id !== ctx.session.messageId) {
+      await ctx.api.deleteMessage(ctx.chat.id, ctx.msg.message_id)
+        .catch((err) => {
+          /* Не удаляется */
+        });
+    }
+
+    next();
+  }
+
+  /**
+   * Заполнение session.listId
+   */
+  async setListId(ctx: SamometerContext, next: NextFunction) {
     if (!ctx.session.listId) {
       const listId = await listRepository.getCurrentListId(ctx.from.id);
       if (!listId) {
@@ -48,34 +72,44 @@ class SessionController {
   }
 
   /**
+   * Переключение в режим deals и передача управления дальше
+   */
+  async listCmd(ctx: SamometerContext, next: NextFunction) {
+    await this._changeMode(ctx, Mode.deals);
+
+    next();
+  }
+
+  /**
    * Переключение между режимами
    */
-  async changeMode(ctx: SamometerContext, next: NextFunction) {
-    ctx.answerCallbackQuery();
+  async setMode(ctx: SamometerContext, next: NextFunction) {
 
     const [, ctxMode, _, listId] = ctx.match;
+
+    await this._changeMode(ctx, (Mode as any)[ctxMode], listId);
+
+    next();
+  }
+
+  async _changeMode(ctx: SamometerContext, mode: Mode, listId?: string) {
+    ctx.session.mode = mode;
 
     if (!isNaN(Number(listId))) {
       ctx.session.listId = Number(listId);
     }
 
-    const mode: Mode = (Mode as any)[ctxMode];
-
-    ctx.session.mode = mode;
-
-    if (ctx.msg.message_id !== ctx.session.messageId) {
-      await ctx.api.deleteMessage(ctx.chat.id, ctx.msg.message_id).catch(() => { /* Ошибка удаления */ });
-    }
+    // if (ctx.msg.message_id !== ctx.session.messageId) {
+    //   await ctx.api.deleteMessage(ctx.chat.id, ctx.msg.message_id).catch(() => { /* Ошибка удаления */ });
+    // }
 
     if (ctx.session.messageId) {
       await ctx.api.deleteMessage(ctx.chat.id, ctx.session.messageId).catch(() => { /* Ошибка удаления */ });
       ctx.session.messageId = null;
     }
-
-    next();
   }
 
-  async deb(ctx: SamometerContext) {
+  async debCmd(ctx: SamometerContext) {
     return ctx.reply(`listId: ${ctx.session.listId}, messageId: ${ctx.session.messageId}`);
   }
 }

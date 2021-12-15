@@ -11,18 +11,14 @@ class ListsController {
   }
 
   init(bot: Bot) {
-    bot.callbackQuery('mode-lists', this.changeMode.bind(this));
+    // Вывод списка
+    bot.callbackQuery('mode-lists', this._updateList.bind(this));
 
     bot.on('message', this.add.bind(this));
   }
 
-  async changeMode(ctx: SamometerContext, next: NextFunction) {
-    // Рисуем список, потому что переключились на Список дел
-    return this._updateList(ctx);
-  }
-
   async add(ctx: SamometerContext, next: NextFunction) {
-    if (!this._checkMode(ctx)) {
+    if (ctx.session.mode !== this.mode) {
       return next();
     }
 
@@ -44,24 +40,22 @@ class ListsController {
     return this._updateList(ctx);
   }
 
-  // todo: Move to base class
-  _checkMode(ctx: SamometerContext) {
-    return ctx.session.mode === this.mode;
-  }
-
   async _updateList(ctx: SamometerContext) {
-    const render = await listsView.render(ctx.from.id);
+    const listRender = await listsView.render(ctx.from.id);
+
     if (ctx.session.messageId) {
       // Обновляем сообщение со списком
-      await ctx.api.editMessageReplyMarkup(ctx.chat.id, ctx.session.messageId, render[1])
+      const [, markup] = listRender;
+      await ctx.api.editMessageReplyMarkup(ctx.chat.id, ctx.session.messageId, markup)
         .catch((err) => {
           /* Список не поменялся */
         });
+
     } else {
-      const response = await ctx.reply.apply(ctx, render);
+      // Заново создаём сообщение со списком
+      const response = await ctx.reply.apply(ctx, listRender);
 
       const { message_id } = response;
-
       if (message_id) {
         ctx.session.messageId = message_id;
       }

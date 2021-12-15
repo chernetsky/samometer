@@ -12,21 +12,21 @@ class DealsController {
   }
 
   init(bot: Bot) {
-    bot.callbackQuery(/^mode-deals(-\d+)?/, this.changeMode.bind(this));
+    // Вывод списка
+    bot.callbackQuery(/^mode-deals(-\d+)?/, this._updateList.bind(this));
+    bot.command('list', this._updateList.bind(this));
 
+    // Манипуляции с делами
     bot.on('message', this.add.bind(this));
-    bot.callbackQuery(/^done-(\d+)$/, this.isOld.bind(this), this.doneDeal.bind(this));
-    bot.callbackQuery(/^undone-(\d+)$/, this.isOld.bind(this), this.undoneDeal.bind(this));
-    bot.callbackQuery('clear-list', this.isOld.bind(this), this.clear.bind(this));
-  }
+    bot.callbackQuery(/^done-(\d+)$/, this.check.bind(this));
+    bot.callbackQuery(/^undone-(\d+)$/, this.uncheck.bind(this));
 
-  async changeMode(ctx: SamometerContext) {
-    // Рисуем список, потому что переключились на Список дел
-    return this._updateList(ctx);
+    // Очистка списка
+    bot.callbackQuery('clear-list', this.clear.bind(this));
   }
 
   async add(ctx: SamometerContext, next: NextFunction) {
-    if (!this._checkMode(ctx)) {
+    if (ctx.session.mode !== this.mode) {
       return next();
     }
 
@@ -48,43 +48,20 @@ class DealsController {
     return this._updateList(ctx);
   }
 
-  _checkMode(ctx: SamometerContext) {
-    return ctx.session.mode === this.mode;
-  }
-
-  /**
-   * Если действия производятся со старым сообщением в чате,
-   * то это сообщение удаляется, и действия передаются актуальному сообщению.
-   */
-  async isOld(ctx: SamometerContext, next: NextFunction) {
-    if (ctx.msg.message_id !== ctx.session.messageId) {
-      await ctx.api.deleteMessage(ctx.chat.id, ctx.msg.message_id)
-        .catch((err) => {
-          /* Не удаляется */
-        });
-    }
-
-    next();
-  }
-
-  async doneDeal(ctx: SamometerContext) {
-    ctx.answerCallbackQuery();
-
+  async check(ctx: SamometerContext) {
     const [, dealId] = ctx.match;
 
-    // Меняем статус
+    // Меняем статус done на true
     await dealRepository.changeDone(Number(dealId), true);
 
     // Обновляем список
     return this._updateList(ctx);
   }
 
-  async undoneDeal(ctx: SamometerContext) {
-    ctx.answerCallbackQuery();
-
+  async uncheck(ctx: SamometerContext) {
     const [, dealId] = ctx.match;
 
-    // Меняем статус
+    // Меняем статус done на false
     await dealRepository.changeDone(Number(dealId), false);
 
     // Обновляем список
@@ -92,9 +69,7 @@ class DealsController {
   }
 
   async clear(ctx: SamometerContext) {
-    ctx.answerCallbackQuery();
-
-    // Меняем статус
+    // Меняем статус deleted
     await dealRepository.setDeleted(ctx.session.listId);
 
     // Обновляем список
@@ -102,19 +77,25 @@ class DealsController {
   }
 
   async _updateList(ctx: SamometerContext) {
+    const listRender = await dealsView.render(ctx.session.listId);
+
     if (ctx.session.messageId) {
       // Обновляем сообщение со списком
-      const [, markup] = await dealsView.render(ctx.session.listId);
+      const [, markup] = listRender;
       await ctx.api.editMessageReplyMarkup(ctx.chat.id, ctx.session.messageId, markup)
         .catch((err) => {
           /* Список не поменялся */
         });
 
-      return;
-    }
+    } else {
+      // Заново создаём сообщение со списком
+      const response = await ctx.reply.apply(ctx, listRender);
 
-    // Заново отрисовываем список
-    return commandsController.list(ctx);
+      const { message_id } = response;
+      if (message_id) {
+        ctx.session.messageId = message_id;
+      }
+    }
   }
 }
 

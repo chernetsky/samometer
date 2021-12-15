@@ -18,7 +18,6 @@ class ErrorsController {
       } else {
         console.error('Unknown error:', e);
       }
-      ctx.answerCallbackQuery();
       return ctx.reply('Бот сломался :(');
     });
   }
