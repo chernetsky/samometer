@@ -31,7 +31,7 @@ class SessionController {
 
     bot.on('callback_query:data', this.buttonMiddleware.bind(this));
 
-    bot.callbackQuery(/^mode-(deals|lists)(-(\d)+)?$/, this.setMode.bind(this));
+    bot.callbackQuery(/^mode-(deals|lists)(-(\d+))?$/, this.setMode.bind(this));
 
     bot.command('list', this.listCmd.bind(this));
 

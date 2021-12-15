@@ -13,7 +13,7 @@ class DealsController {
 
   init(bot: Bot) {
     // Вывод списка
-    bot.callbackQuery(/^mode-deals(-\d+)?/, this._updateList.bind(this));
+    bot.callbackQuery(/^mode-deals(-(\d+))?/, this._updateList.bind(this));
     bot.command('list', this._updateList.bind(this));
 
     // Манипуляции с делами
