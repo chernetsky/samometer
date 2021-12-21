@@ -22,7 +22,7 @@ class ListRepository {
       where: {
         deleted: false,
         users: {
-          every: {
+          some: {
             id: userId,
           },
         },
