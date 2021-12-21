@@ -20,8 +20,12 @@ class ListRepository {
   async getListsByUserId(userId: number): Promise<List[]> {
     return this.model.findMany({
       where: {
-        userId,
         deleted: false,
+        users: {
+          every: {
+            id: userId,
+          },
+        },
       },
       orderBy: {
         createdAt: 'asc',
@@ -33,8 +37,12 @@ class ListRepository {
     const result = await this.model.findFirst({
       select: { id: true },
       where: {
-        userId,
         specialId: LIST_SPECIAL.TODAY,
+        users: {
+          every: {
+            id: userId,
+          },
+        },
       },
     });
 
@@ -44,30 +52,48 @@ class ListRepository {
   async getCurrentList(userId: number): Promise<List> {
     return this.model.findFirst({
       where: {
-        userId,
         specialId: LIST_SPECIAL.TODAY,
+        users: {
+          every: {
+            id: userId,
+          },
+        },
       },
     });
   }
 
-  async create(data: { name: string, userId: number }) {
-    const { name, userId } = data;
+  async create(userId: number, data: { name: string }) {
+    const { name } = data;
     return this.model.create({
       data: {
         name,
-        userId,
+        users: {
+          connect: [{ id: userId }],
+        },
       },
     });
   }
 
   async createSpecialList(userId: number, specialId: string) {
-    if (await this.model.count({ where: { userId, specialId } }) === 0) {
+    if (await this.model.count({
+      where: {
+        specialId, users: {
+          every: {
+            id: userId,
+          },
+        },
+      },
+    }) === 0) {
       return this.model.create({
         data: {
-          userId,
           specialId,
           name: LIST_SPECIAL_DESCRIPTORS[specialId].name,
           tracking: false, // По специальным спискам статистику не собираем
+          users: {
+            connect: [
+              { id: userId },
+            ],
+          },
         },
       });
     }

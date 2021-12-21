@@ -28,8 +28,7 @@ class ListsController {
     }
 
     // Создаём новый список
-    await listRepository.create({
-      userId: ctx.from.id,
+    await listRepository.create(ctx.from.id, {
       name: text,
     });
 

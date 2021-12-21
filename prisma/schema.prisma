@@ -8,14 +8,23 @@ generator client {
   binaryTargets = ["native"]
 }
 
+model User {
+  id       Int    @id
+  username String
+  lists    List[] @relation(references: [id])
+
+  @@map("users")
+}
+
 model List {
   id        Int      @id @default(autoincrement())
-  userId    Int
+  userId    Int? // DEPRECATED
   name      String
   specialId String? // Samometer special lists Id
   tracking  Boolean  @default(true)
   createdAt DateTime @default(now())
   deleted   Boolean  @default(false)
+  users     User[]   @relation(references: [id])
   deals     Deal[]
 
   @@map("lists")

@@ -10,8 +10,8 @@ function bootstrap() {
   const bot = new Bot<SamometerContext>(process.env.BOT_TOKEN);
 
   [
-    sessionController,
     commandsController,
+    sessionController,
     dealsController,
     listsController,
     errorsController,
