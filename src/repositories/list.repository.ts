@@ -39,7 +39,7 @@ class ListRepository {
       where: {
         specialId: LIST_SPECIAL.TODAY,
         users: {
-          every: {
+          some: {
             id: userId,
           },
         },
@@ -54,7 +54,7 @@ class ListRepository {
       where: {
         specialId: LIST_SPECIAL.TODAY,
         users: {
-          every: {
+          some: {
             id: userId,
           },
         },
@@ -77,8 +77,9 @@ class ListRepository {
   async createSpecialList(userId: number, specialId: string) {
     if (await this.model.count({
       where: {
-        specialId, users: {
-          every: {
+        specialId,
+        users: {
+          some: {
             id: userId,
           },
         },
