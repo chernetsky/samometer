@@ -16,15 +16,8 @@ class CommandsController {
 
       const hCommands = getHashtagCommands(ctx.msg.text, ctx.msg.entities);
 
-      if (!hCommands.text) {
-        return ctx.reply('to, text');
-      }
-
-      if (hCommands.to === 'lena') {
-        return bot.api.sendMessage(111787421, hCommands.text);
-      }
-
-      return bot.api.sendMessage(160746560, hCommands.text);
+      const text = hCommands.v1 || 'Привет';
+      return bot.api.sendMessage(hCommands.u === 'lena' ? 111787421 : 160746560, text);
     });
   }
 
