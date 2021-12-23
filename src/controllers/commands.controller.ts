@@ -3,6 +3,7 @@ import listRepository from '../repositories/list.repository';
 import userRepository from '../repositories/user.repository';
 import { LIST_SPECIAL } from '../constants';
 import { SamometerContext } from './session.controller';
+import { getHashtagCommands } from '../utils';
 
 class CommandsController {
   init(bot: Bot) {
@@ -10,9 +11,28 @@ class CommandsController {
 
     bot.command('start', this.start.bind(this));
     // bot.command('share').on(':entities:mention', this.share.bind(this));
+
+    bot.on('msg:entities:hashtag', (ctx) => {
+
+      const hCommands = getHashtagCommands(ctx.msg.text, ctx.msg.entities);
+
+      if (!hCommands.text) {
+        return ctx.reply('to, text');
+      }
+
+      if (hCommands.to === 'lena') {
+        return bot.api.sendMessage(111787421, hCommands.text);
+      }
+
+      return bot.api.sendMessage(160746560, hCommands.text);
+    });
   }
 
   filter(ctx: SamometerContext, next: NextFunction) {
+    // console.log(ctx.msg);
+    console.log(ctx.chat);
+    console.log(ctx.from);
+
     if (ctx.from.is_bot) {
       return ctx.reply('No bots allowed!');
     }
