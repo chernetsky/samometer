@@ -9,7 +9,7 @@ class ListRepository {
     this.model = dbClient.list;
   }
 
-  async getListById(id: number): Promise<List> {
+  getListById(id: number): Promise<List> {
     return this.model.findUnique({
       where: {
         id,
@@ -17,7 +17,7 @@ class ListRepository {
     });
   }
 
-  async getListsByUserId(userId: number): Promise<List[]> {
+  getListsByUserId(userId: number): Promise<List[]> {
     return this.model.findMany({
       where: {
         deleted: false,
@@ -31,6 +31,21 @@ class ListRepository {
         createdAt: 'asc',
       },
     });
+  }
+
+  async getListOwners(listId: number): Promise<number[]> {
+    const results = await this.model.findUnique({
+      where: {
+        id: listId,
+      },
+      select: {
+        users: {
+          select: { id: true },
+        },
+      },
+    });
+
+    return results.users.map(u => u.id);
   }
 
   async getCurrentListId(userId: number): Promise<number | null> {

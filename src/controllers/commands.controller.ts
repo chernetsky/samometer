@@ -13,19 +13,14 @@ class CommandsController {
     // bot.command('share').on(':entities:mention', this.share.bind(this));
 
     bot.on('msg:entities:hashtag', (ctx) => {
-
       const hCommands = getHashtagCommands(ctx.msg.text, ctx.msg.entities);
 
       const text = hCommands.v1 || 'Привет';
-      return bot.api.sendMessage(hCommands.u === 'lena' ? 111787421 : 160746560, text);
+      return ctx.api.sendMessage(hCommands.u === 'lena' ? 111787421 : 160746560, text);
     });
   }
 
   filter(ctx: SamometerContext, next: NextFunction) {
-    // console.log(ctx.msg);
-    console.log(ctx.chat);
-    console.log(ctx.from);
-
     if (ctx.from.is_bot) {
       return ctx.reply('No bots allowed!');
     }

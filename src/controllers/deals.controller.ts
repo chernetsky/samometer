@@ -1,7 +1,7 @@
 import { Bot, InlineKeyboard, NextFunction } from 'grammy';
 import dealsView from '../views/deals.view';
 import dealRepository from '../repositories/deal.repository';
-import commandsController from './commands.controller';
+import listRepository from '../repositories/list.repository';
 import { SamometerContext } from './session.controller';
 
 class DealsController {
@@ -45,7 +45,7 @@ class DealsController {
     await ctx.deleteMessage();
 
     // Обновляем список
-    return this._updateList(ctx);
+    return this._updateList(ctx, true);
   }
 
   async check(ctx: SamometerContext) {
@@ -55,7 +55,7 @@ class DealsController {
     await dealRepository.changeDone(Number(dealId), true);
 
     // Обновляем список
-    return this._updateList(ctx);
+    return this._updateList(ctx, true);
   }
 
   async uncheck(ctx: SamometerContext) {
@@ -65,7 +65,7 @@ class DealsController {
     await dealRepository.changeDone(Number(dealId), false);
 
     // Обновляем список
-    return this._updateList(ctx);
+    return this._updateList(ctx, true);
   }
 
   async clear(ctx: SamometerContext) {
@@ -73,10 +73,22 @@ class DealsController {
     await dealRepository.setDeleted(ctx.session.listId);
 
     // Обновляем список
-    return this._updateList(ctx);
+    return this._updateList(ctx, true);
   }
 
-  async _updateList(ctx: SamometerContext) {
+  async _updateList(ctx: SamometerContext, notifyOthers = false) {
+    // todo: Послать комманду на обновление списка всем остальным владельцам
+    if (typeof notifyOthers === 'boolean' && notifyOthers) {
+      // Получить список владельцев списка
+      const userIds = await listRepository.getListOwners(ctx.session.listId);
+
+      // Отправить сообщение остальным владельцам
+      userIds.filter(id => id !== ctx.from.id).forEach(id => {
+        console.log(`Send hMessage to ${id}`);
+        ctx.api.sendMessage(id, `Обновился список ${ctx.session.listId}`);
+      });
+    }
+
     const listRender = await dealsView.render(ctx.session.listId);
 
     if (ctx.session.messageId) {
