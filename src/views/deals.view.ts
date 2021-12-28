@@ -1,5 +1,6 @@
 // import { List } from '@prisma/client';
 import { InlineKeyboard } from 'grammy';
+import type { ParseMode } from '@grammyjs/types';
 import dealRepository from '../repositories/deal.repository';
 import listRepository from '../repositories/list.repository';
 
@@ -10,7 +11,7 @@ class DealsView {
     this.maxDealLength = 150; // ;115;
   }
 
-  async render(listId: number): Promise<[string, { reply_markup: InlineKeyboard, parse_mode: string }]> {
+  async render(listId: number): Promise<[string, { reply_markup: InlineKeyboard, parse_mode: ParseMode }]> {
     const list = await listRepository.getListById(listId);
 
     if (list) {
