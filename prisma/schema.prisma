@@ -8,6 +8,13 @@ generator client {
   binaryTargets = ["native"]
 }
 
+model Session {
+  key   String @id
+  value String
+
+  @@map("sessions")
+}
+
 model User {
   id       Int    @id
   username String

@@ -1,5 +1,5 @@
 import db from '../providers/db';
-import { Deal, Prisma, PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 
 class DealRepository {
   dealModel: Prisma.DealDelegate<Prisma.RejectOnNotFound | Prisma.RejectPerOperation>;

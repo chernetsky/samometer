@@ -1,4 +1,4 @@
-import { Bot, InlineKeyboard, NextFunction } from 'grammy';
+import { Bot, NextFunction } from 'grammy';
 import listsView from '../views/lists.view';
 import listRepository from '../repositories/list.repository';
 import { SamometerContext } from './session.controller';
@@ -14,6 +14,7 @@ class ListsController {
     // Вывод списка
     bot.callbackQuery('mode-lists', this._updateList.bind(this));
 
+    // Добавление нового списка
     bot.on('message', this.add.bind(this));
   }
 

@@ -16,13 +16,15 @@ class DealsController {
     bot.callbackQuery(/^mode-deals(-(\d+))?/, this._updateList.bind(this));
     bot.command('list', this._updateList.bind(this));
 
-    // Манипуляции с делами
+    // Создать дело
     bot.on('message', this.add.bind(this));
-    bot.callbackQuery(/^done-(\d+)$/, this.check.bind(this));
-    bot.callbackQuery(/^undone-(\d+)$/, this.uncheck.bind(this));
+
+    // Сделано/не сделано
+    bot.callbackQuery(/^((un)?done)-(\d+)$/, this.done.bind(this));
 
     // Очистка списка
     bot.callbackQuery('clear-list', this.clear.bind(this));
+
   }
 
   async add(ctx: SamometerContext, next: NextFunction) {
@@ -48,21 +50,11 @@ class DealsController {
     return this._updateList(ctx, true);
   }
 
-  async check(ctx: SamometerContext) {
-    const [, dealId] = ctx.match;
+  async done(ctx: SamometerContext) {
+    const [, action, , dealId] = ctx.match;
 
     // Меняем статус done на true
-    await dealRepository.changeDone(Number(dealId), true);
-
-    // Обновляем список
-    return this._updateList(ctx, true);
-  }
-
-  async uncheck(ctx: SamometerContext) {
-    const [, dealId] = ctx.match;
-
-    // Меняем статус done на false
-    await dealRepository.changeDone(Number(dealId), false);
+    await dealRepository.changeDone(Number(dealId), action === 'done');
 
     // Обновляем список
     return this._updateList(ctx, true);
@@ -77,17 +69,19 @@ class DealsController {
   }
 
   async _updateList(ctx: SamometerContext, notifyOthers = false) {
-    // todo: Послать комманду на обновление списка всем остальным владельцам
-    if (typeof notifyOthers === 'boolean' && notifyOthers) {
-      // Получить список владельцев списка
-      const userIds = await listRepository.getListOwners(ctx.session.listId);
+    // Послать комманду на обновление списка всем остальным владельцам
+    // todo: вынести отсюда в метод
+    // if (typeof notifyOthers === 'boolean' && notifyOthers) {
+    //   // Получить список владельцев списка
+    //   const userIds = await listRepository.getListOwners(ctx.session.listId);
 
-      // Отправить сообщение остальным владельцам
-      userIds.filter(id => id !== ctx.from.id).forEach(id => {
-        console.log(`Send hMessage to ${id}`);
-        ctx.api.sendMessage(id, `Обновился список ${ctx.session.listId}`);
-      });
-    }
+    //   // Отправить сообщение остальным владельцам
+    //   userIds
+    //     // .filter(id => id !== ctx.from.id)
+    //     .forEach(async (id) => {
+    //       // todo: Обновить списки всех участников
+    //     });
+    // }
 
     const listRender = await dealsView.render(ctx.session.listId);
 

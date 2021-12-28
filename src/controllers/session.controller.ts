@@ -1,4 +1,6 @@
 import { Bot, Context, NextFunction, session, SessionFlavor } from 'grammy';
+import db from '../providers/db';
+import { PrismaAdapter } from '../utils/PrismaAdapter';
 import listRepository from '../repositories/list.repository';
 
 enum Mode {
@@ -24,6 +26,7 @@ class SessionController {
             mode: Mode.deals,
           };
         },
+        storage: new PrismaAdapter(db.client),
       }),
     );
 
@@ -43,16 +46,16 @@ class SessionController {
    * то это сообщение удаляется, и действия передаются актуальному сообщению.
    */
   async buttonMiddleware(ctx: SamometerContext, next: NextFunction) {
-    ctx.answerCallbackQuery();
+    await ctx.answerCallbackQuery();
 
-    if (ctx.msg.message_id !== ctx.session.messageId) {
+    if (ctx.session.messageId && ctx.msg.message_id !== ctx.session.messageId) {
       await ctx.api.deleteMessage(ctx.chat.id, ctx.msg.message_id)
         .catch((err) => {
           /* Не удаляется */
         });
     }
 
-    next();
+    return next();
   }
 
   /**
@@ -68,7 +71,7 @@ class SessionController {
       ctx.session.listId = listId;
     }
 
-    next();
+    return next();
   }
 
   /**
@@ -77,7 +80,7 @@ class SessionController {
   async listCmd(ctx: SamometerContext, next: NextFunction) {
     await this._changeMode(ctx, Mode.deals);
 
-    next();
+    return next();
   }
 
   /**
@@ -89,7 +92,7 @@ class SessionController {
 
     await this._changeMode(ctx, (Mode as any)[ctxMode], listId);
 
-    next();
+    return next();
   }
 
   async _changeMode(ctx: SamometerContext, mode: Mode, listId?: string) {
