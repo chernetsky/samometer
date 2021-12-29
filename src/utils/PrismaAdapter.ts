@@ -34,7 +34,7 @@ export class PrismaAdapter<T> implements StorageAdapter<T> {
     await this.sessionModel.update({
       where: { key },
       data: { value: JSON.stringify(value) },
-    });
+    }).catch(err => console.log('Session write error', err));
   }
 
   async delete(key: string) {
