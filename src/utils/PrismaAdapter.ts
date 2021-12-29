@@ -30,10 +30,12 @@ export class PrismaAdapter<T> implements StorageAdapter<T> {
     return JSON.parse(session.value as string) as T;
   }
 
-  async write(key: string, value: T) {
-    await this.sessionModel.update({
+  async write(key: string, rawValue: T) {
+    const value = JSON.stringify(rawValue);
+    await this.sessionModel.upsert({
       where: { key },
-      data: { value: JSON.stringify(value) },
+      create: { key, value },
+      update: { value: JSON.stringify(value) },
     }).catch(err => console.log('Session write error', err));
   }
 
