@@ -1,0 +1,5 @@
+check-leaks: true
+fail-zero: true
+recursive: true
+require:
+  - ./test/env/environment.js

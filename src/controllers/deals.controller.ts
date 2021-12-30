@@ -1,10 +1,10 @@
-import { Bot, InlineKeyboard, NextFunction } from 'grammy';
+import { Bot, NextFunction } from 'grammy';
 import dealsView from '../views/deals.view';
 import dealRepository from '../repositories/deal.repository';
 import listRepository from '../repositories/list.repository';
 import sessionRepository from '../repositories/session.repository';
 import { SamometerContext } from './session.controller';
-import { map, forEach } from 'ramda';
+import { map } from 'ramda';
 
 class DealsController {
   private mode: string;
@@ -26,7 +26,6 @@ class DealsController {
 
     // Очистка списка
     bot.callbackQuery('clear-list', this.clear.bind(this));
-
   }
 
   /**
@@ -79,7 +78,6 @@ class DealsController {
   }
 
   async _updateList(ctx: SamometerContext, onlyForMe = false) {
-
     const currentListId = ctx.session.listId;
 
     // Получаем рендер списка
@@ -101,7 +99,7 @@ class DealsController {
 
       if (mode !== this.mode || listId !== currentListId) {
         // В этой сессии не тот режим или не тот текущий список
-        console.log(`Skip list render for session ${chatId}`);
+        // console.log(`Skip list render for session ${chatId}`);
         return;
       }
 
