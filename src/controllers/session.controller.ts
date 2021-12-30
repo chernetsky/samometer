@@ -2,7 +2,7 @@ import { Bot, Context, NextFunction, session, SessionFlavor } from 'grammy';
 import db from '../providers/db';
 import { PrismaAdapter } from '../utils/PrismaAdapter';
 import listRepository from '../repositories/list.repository';
-import { deleteNotTrackingMessage } from 'utils';
+import { deleteNotTrackingMessage } from '../utils';
 
 enum Mode {
   deals = 'deals',
