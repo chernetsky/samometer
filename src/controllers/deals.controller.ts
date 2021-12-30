@@ -4,6 +4,7 @@ import dealRepository from '../repositories/deal.repository';
 import listRepository from '../repositories/list.repository';
 import sessionRepository from '../repositories/session.repository';
 import { SamometerContext } from './session.controller';
+import { map, forEach } from 'ramda';
 
 class DealsController {
   private mode: string;
@@ -28,6 +29,9 @@ class DealsController {
 
   }
 
+  /**
+   * Вывод текущего списка
+   */
   async list(ctx: SamometerContext) {
     // Обновляем список только для текущего юзера
     return this._updateList(ctx, true);
@@ -86,11 +90,11 @@ class DealsController {
       [ctx.from.id] :
       await listRepository.getListOwners(currentListId);
 
-    const sessions = onlyForMe ?
-      [{ key: ctx.from.id, value: JSON.stringify(ctx.session) }] :
-      await sessionRepository.getByKeys(userIds.map(id => String(id)));
+    const dbSessions = onlyForMe ?
+      [{ key: String(ctx.from.id), value: JSON.stringify(ctx.session) }] :
+      await sessionRepository.getByKeys(map(String, userIds));
 
-    for (const s of sessions) {
+    for (const s of dbSessions) {
       const { key: chatId, value } = s;
       const sessValues = JSON.parse(value);
       const { listId, messageId, mode } = sessValues;
@@ -114,7 +118,7 @@ class DealsController {
         const response = await ctx.api.sendMessage(chatId, text, markup);
 
         const { message_id } = response;
-        if (String(ctx.from.id) === chatId && message_id) {
+        if (message_id && String(ctx.from.id) === chatId) {
           // Текущему юзеру записываем новое messageId в сессию
           ctx.session.messageId = message_id;
         }

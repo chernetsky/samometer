@@ -87,8 +87,7 @@ class SessionController {
    * Переключение между режимами
    */
   async setMode(ctx: SamometerContext, next: NextFunction) {
-
-    const [, ctxMode, _, listId] = ctx.match;
+    const [, ctxMode, , listId] = ctx.match;
 
     await this._changeMode(ctx, (Mode as any)[ctxMode], listId);
 
@@ -101,11 +100,11 @@ class SessionController {
     if (!isNaN(Number(listId))) {
       ctx.session.listId = Number(listId);
     }
-
-    // if (ctx.msg.message_id !== ctx.session.messageId) {
-    //   await ctx.api.deleteMessage(ctx.chat.id, ctx.msg.message_id).catch(() => { /* Ошибка удаления */ });
-    // }
-
+    /*
+     * Удаляем старое сообщение:
+     * - если это команда /list, то хотят новый список - либо нет сообщение, либо оно уехало наверх
+     * - если это смена режима, то проще удалить и создать заново, чем редактировать текст и кнопки
+     */
     if (ctx.session.messageId) {
       await ctx.api.deleteMessage(ctx.chat.id, ctx.session.messageId).catch(() => { /* Ошибка удаления */ });
       ctx.session.messageId = null;
