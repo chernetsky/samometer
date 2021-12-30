@@ -2,6 +2,7 @@ import { Bot, Context, NextFunction, session, SessionFlavor } from 'grammy';
 import db from '../providers/db';
 import { PrismaAdapter } from '../utils/PrismaAdapter';
 import listRepository from '../repositories/list.repository';
+import { deleteNotTrackingMessage } from 'utils';
 
 enum Mode {
   deals = 'deals',
@@ -48,12 +49,7 @@ class SessionController {
   async buttonMiddleware(ctx: SamometerContext, next: NextFunction) {
     await ctx.answerCallbackQuery();
 
-    if (ctx.session.messageId && ctx.msg.message_id !== ctx.session.messageId) {
-      await ctx.api.deleteMessage(ctx.chat.id, ctx.msg.message_id)
-        .catch((err) => {
-          /* Не удаляется */
-        });
-    }
+    await deleteNotTrackingMessage(ctx);
 
     return next();
   }
