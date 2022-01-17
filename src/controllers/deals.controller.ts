@@ -80,7 +80,6 @@ class DealsController {
   async _updateList(ctx: SamometerContext, onlyForMe = false) {
     const currentListId = ctx.session.listId;
 
-    console.log('currentListId', currentListId);
     // Получаем рендер списка
     const listRender = await dealsView.render(currentListId);
 
@@ -89,13 +88,9 @@ class DealsController {
       [ctx.from.id] :
       await listRepository.getListOwners(currentListId);
 
-    console.log('userIds', userIds);
-
     const dbSessions = onlyForMe ?
       [{ key: String(ctx.from.id), value: JSON.stringify(ctx.session) }] :
       await sessionRepository.getByKeys(map(String, userIds));
-
-    console.log('dbSessions', dbSessions);
 
     for (const s of dbSessions) {
       const { key: chatId, value } = s;
@@ -104,13 +99,13 @@ class DealsController {
 
       if (mode !== this.mode || listId !== currentListId) {
         // В этой сессии не тот режим или не тот текущий список
-        console.log('debug', listId, currentListId, listId !== currentListId, typeof listId, typeof currentListId);
         console.log(`Skip list render for session ${chatId}`);
         return;
       }
 
       const [text, markup] = listRender;
       if (messageId) {
+        console.log('update message', messageId);
         // Обновляем сообщение со списком
         await ctx.api.editMessageReplyMarkup(chatId, messageId, markup)
           .catch((err) => {
@@ -119,6 +114,7 @@ class DealsController {
           });
 
       } else {
+        console.log('rerender message');
         // Заново создаём сообщение со списком
         const response = await ctx.api.sendMessage(chatId, text, markup);
 
