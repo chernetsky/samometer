@@ -104,6 +104,7 @@ class DealsController {
 
       if (mode !== this.mode || listId !== currentListId) {
         // В этой сессии не тот режим или не тот текущий список
+        console.log('debug', listId, currentListId, listId !== currentListId, typeof listId, typeof currentListId);
         console.log(`Skip list render for session ${chatId}`);
         return;
       }
@@ -114,7 +115,7 @@ class DealsController {
         await ctx.api.editMessageReplyMarkup(chatId, messageId, markup)
           .catch((err) => {
             /* Список не поменялся */
-            console.log('catch 1', err);
+            console.log('catch message update', err);
           });
 
       } else {
