@@ -92,35 +92,28 @@ class DealsController {
       [{ key: String(ctx.from.id), value: JSON.stringify(ctx.session) }] :
       await sessionRepository.getByKeys(map(String, userIds));
 
-    console.log('_updateList sessions', dbSessions);
-
     for (const s of dbSessions) {
       const { key: chatId, value } = s;
       const sessValues = JSON.parse(value);
       const { listId, messageId, mode } = sessValues;
 
-      console.log('sessValies', listId, messageId, mode);
-
       if (mode !== this.mode || listId !== currentListId) {
         // В этой сессии не тот режим или не тот текущий список
-        console.log(`Skip list render for session ${chatId}`);
+        // console.log(`Skip list render for session ${chatId}`);
         continue;
       }
 
       const [text, markup] = listRender;
 
-      console.log('text, markup', text, markup);
       if (messageId) {
-        console.log('update message', messageId);
         // Обновляем сообщение со списком
         await ctx.api.editMessageReplyMarkup(chatId, messageId, markup)
           .catch((err) => {
             /* Список не поменялся */
-            console.log('catch message update', err);
+            console.log('_updateList catch message update', err);
           });
 
       } else {
-        console.log('rerender message');
         // Заново создаём сообщение со списком
         const response = await ctx.api.sendMessage(chatId, text, markup);
 
