@@ -99,6 +99,8 @@ class DealsController {
       const sessValues = JSON.parse(value);
       const { listId, messageId, mode } = sessValues;
 
+      console.log('sessValies', listId, messageId, mode);
+
       if (mode !== this.mode || listId !== currentListId) {
         // В этой сессии не тот режим или не тот текущий список
         console.log(`Skip list render for session ${chatId}`);
@@ -106,6 +108,8 @@ class DealsController {
       }
 
       const [text, markup] = listRender;
+
+      console.log('text, markup', text, markup);
       if (messageId) {
         console.log('update message', messageId);
         // Обновляем сообщение со списком
