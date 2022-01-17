@@ -92,6 +92,8 @@ class DealsController {
       [{ key: String(ctx.from.id), value: JSON.stringify(ctx.session) }] :
       await sessionRepository.getByKeys(map(String, userIds));
 
+    console.log('_updateList sessions', dbSessions);
+
     for (const s of dbSessions) {
       const { key: chatId, value } = s;
       const sessValues = JSON.parse(value);
