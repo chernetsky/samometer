@@ -104,7 +104,7 @@ class DealsController {
       if (mode !== this.mode || listId !== currentListId) {
         // В этой сессии не тот режим или не тот текущий список
         console.log(`Skip list render for session ${chatId}`);
-        return;
+        continue;
       }
 
       const [text, markup] = listRender;
