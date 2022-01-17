@@ -80,6 +80,7 @@ class DealsController {
   async _updateList(ctx: SamometerContext, onlyForMe = false) {
     const currentListId = ctx.session.listId;
 
+    console.log('currentListId', currentListId);
     // Получаем рендер списка
     const listRender = await dealsView.render(currentListId);
 
@@ -88,9 +89,13 @@ class DealsController {
       [ctx.from.id] :
       await listRepository.getListOwners(currentListId);
 
+    console.log('userIds', userIds);
+
     const dbSessions = onlyForMe ?
       [{ key: String(ctx.from.id), value: JSON.stringify(ctx.session) }] :
       await sessionRepository.getByKeys(map(String, userIds));
+
+    console.log('dbSessions', dbSessions);
 
     for (const s of dbSessions) {
       const { key: chatId, value } = s;
@@ -99,7 +104,7 @@ class DealsController {
 
       if (mode !== this.mode || listId !== currentListId) {
         // В этой сессии не тот режим или не тот текущий список
-        // console.log(`Skip list render for session ${chatId}`);
+        console.log(`Skip list render for session ${chatId}`);
         return;
       }
 
@@ -109,6 +114,7 @@ class DealsController {
         await ctx.api.editMessageReplyMarkup(chatId, messageId, markup)
           .catch((err) => {
             /* Список не поменялся */
+            console.log('catch 1', err);
           });
 
       } else {
