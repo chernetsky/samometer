@@ -1,7 +1,7 @@
 import { Bot, NextFunction } from 'grammy';
 import listRepository from '../repositories/list.repository';
 import userRepository from '../repositories/user.repository';
-import { LIST_SPECIAL } from '../constants';
+import { HELP_TEXT, LIST_SPECIAL } from '../constants';
 import { SamometerContext } from './session.controller';
 
 class CommandsController {
@@ -9,6 +9,7 @@ class CommandsController {
     bot.use(this.filter.bind(this));
 
     bot.command('start', this.start.bind(this));
+    bot.command('help', this.help.bind(this));
   }
 
   filter(ctx: SamometerContext, next: NextFunction) {
@@ -29,6 +30,14 @@ class CommandsController {
     const result = await listRepository.createSpecialList(ctx.from.id, LIST_SPECIAL.TODAY);
 
     return ctx.reply(result ? 'Создан список Сегодня' : 'Что сегодня делаем?');
+  }
+
+  /**
+   * Help
+   */
+  async help(ctx: SamometerContext) {
+    console.log(HELP_TEXT);
+    return ctx.reply(HELP_TEXT, { parse_mode: 'MarkdownV2' });
   }
 }
 
