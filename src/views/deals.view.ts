@@ -5,10 +5,18 @@ import dealRepository from '../repositories/deal.repository';
 import listRepository from '../repositories/list.repository';
 
 class DealsView {
-  maxDealLength: number;
+  // spaceSign: string;
+  // spaceSignWidth: number;
+  doneSign: string;
+  undoneSign: string;
+  // maxWidth: number;
 
   constructor() {
-    this.maxDealLength = 150; // ;115;
+    this.doneSign = 'V';
+    this.undoneSign = '. ';
+    // this.spaceSign = '.';
+    // this.spaceSignWidth = getWidth(this.spaceSign);
+    // this.maxWidth = 500;
   }
 
   async render(listId: number): Promise<[string, { reply_markup: InlineKeyboard, parse_mode: ParseMode }]> {
@@ -18,11 +26,15 @@ class DealsView {
       const listKeyboard = new InlineKeyboard();
       const deals = await dealRepository.getDealsByListId(listId);
 
-      deals.forEach(d => listKeyboard.text(
-        this._renderDealText.bind(this)(d.name, d.doneAt),
-        `${d.doneAt ? 'undone' : 'done'}-${d.id}`,
-      ).row());
+      deals.forEach((d) => {
+        const callbackStr = `${d.doneAt ? 'undone' : 'done'}-${d.id}`;
+        listKeyboard
+          .text(`${d.doneAt ? this.doneSign : this.undoneSign}`, callbackStr)
+          .text(d.name, callbackStr)
+          .row();
+      });
 
+      this.appendGridButtons(listKeyboard);
       this.appendServiceButtons(listKeyboard);
 
       // tslint:disable-next-line: max-line-length
@@ -30,6 +42,17 @@ class DealsView {
     }
   }
 
+  appendGridButtons(keyboard: InlineKeyboard) {
+    return keyboard
+      .text('.')
+      .text('.')
+      .text('.')
+      .text('.')
+      .text('.')
+      .text('.')
+      .text('.')
+      .row();
+  }
   appendServiceButtons(keyboard: InlineKeyboard) {
     return keyboard
       .text('🆗        Очистить', 'clear-list')
@@ -42,12 +65,11 @@ class DealsView {
   }
 
   _renderDealText(text: string, done: boolean): string {
-    let result = done ? 'V' : '. '; // '☑️'
+    // let result = done ? this.doneSign : this.undoneSign;
 
-    const separator = '    .   ';
-    result += `${separator.repeat(2)}${text}${separator.repeat(this.maxDealLength)}.`;
+    // result += `${this.spaceSign.repeat(numSpaceSigns)}${text}`;
 
-    return result;
+    return text;
   }
 }
 
