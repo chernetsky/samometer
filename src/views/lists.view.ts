@@ -14,18 +14,20 @@ class ListsView {
       `mode-deals-${l.id}`,
     ).row());
 
-    // this.appendServiceButtons(listKeyboard);
+    this.appendServiceButtons(listKeyboard);
 
     return [this._renderTitle(), { reply_markup: listKeyboard, parse_mode: 'MarkdownV2' }];
   }
 
-  // appendServiceButtons(keyboard: InlineKeyboard) {
-  //   return keyboard
-  //     .text('🆕        Создать список', 'create-list').row();
-  // }
+  appendServiceButtons(keyboard: InlineKeyboard) {
+    return keyboard
+      .text('⏹        Удалить', 'delete-list-mode')
+      .text('Поделиться        ↔️', 'share-list-mode')
+      .row();
+  }
 
   _renderTitle(): string {
-    return 'Управление списками';
+    return 'Все списки';
   }
 
   _renderListText(text: string): string {
