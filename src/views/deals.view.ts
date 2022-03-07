@@ -1,16 +1,13 @@
-// import { List } from '@prisma/client';
 import { InlineKeyboard } from 'grammy';
 import type { ParseMode } from '@grammyjs/types';
 import dealRepository from '../repositories/deal.repository';
 import listRepository from '../repositories/list.repository';
 
 class DealsView {
-  maxDealLength: number;
   maxTextName: number;
 
   constructor() {
     this.maxTextName = 50;
-    this.maxDealLength = 100; // ;115;
   }
 
   async render(listId: number): Promise<[string, { reply_markup: InlineKeyboard, parse_mode: ParseMode }]> {
@@ -44,16 +41,13 @@ class DealsView {
   }
 
   _renderDealText(text: string, done: boolean): string {
-    // let result = done ? 'V' : ' . '; // '☑️'
-    const separator = done ? '✅' : '';
+    const doneSymbol = done ? '✅' : '';
 
-    const shortText = text.length > this.maxTextName ?
-      `${text.slice(0, this.maxTextName)}` :
-      `${text}`;
+    // const shortText = text.length > this.maxTextName ?
+    //   `${text.slice(0, this.maxTextName)}` :
+    //   `${text}`;
 
-    const result = `${separator} ${shortText} ${separator}`;
-
-    return result;
+    return `${doneSymbol}  ${text}`;
   }
 }
 
