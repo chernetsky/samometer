@@ -21,8 +21,8 @@ class ListsView {
 
   appendServiceButtons(keyboard: InlineKeyboard) {
     return keyboard
-      .text('⏹        Удалить', 'delete-list-mode')
-      .text('Поделиться        ↔️', 'share-list-mode')
+      .text('⏹        Удалить', 'delete-lists-mode')
+      .text('Поделиться        ↔️', 'share-lists-mode')
       .row();
   }
 
