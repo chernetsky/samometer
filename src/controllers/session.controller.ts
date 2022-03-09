@@ -4,14 +4,22 @@ import { PrismaAdapter } from '../utils/PrismaAdapter';
 import listRepository from '../repositories/list.repository';
 import { deleteNotTrackingMessage } from '../utils';
 
-enum Mode {
+export enum Mode {
   deals = 'deals',
   lists = 'lists',
 }
+
+export enum SubMode {
+  basic = 'basic',
+  delete = 'delete',
+  share = 'share',
+}
+
 interface SessionData {
   listId: number;
   messageId: number;
   mode: Mode;
+  subMode: SubMode;
 }
 
 export type SamometerContext = Context & SessionFlavor<SessionData>;
@@ -25,6 +33,7 @@ class SessionController {
             listId: null,
             messageId: null,
             mode: Mode.deals,
+            subMode: SubMode.basic,
           };
         },
         storage: new PrismaAdapter(db.client),
@@ -36,6 +45,8 @@ class SessionController {
     bot.on('callback_query:data', this.buttonMiddleware.bind(this));
 
     bot.callbackQuery(/^mode-(deals|lists)(-(\d+))?$/, this.setMode.bind(this));
+
+    bot.callbackQuery(/^submode-(\w+)$/, this.setSubMode.bind(this));
 
     bot.command('list', this.listCmd.bind(this));
 
@@ -71,7 +82,9 @@ class SessionController {
   }
 
   /**
-   * Переключение в режим deals и передача управления дальше
+   * Команда /list
+   * - переключение в режим отображения списка deals
+   * - и передаёт управления дальше
    */
   async listCmd(ctx: SamometerContext, next: NextFunction) {
     await this._changeMode(ctx, Mode.deals);
@@ -80,25 +93,47 @@ class SessionController {
   }
 
   /**
-   * Переключение между режимами
+   * Переключение между режимами по кнопке
+   * - получает режим из контекста команды
+   * - сохраняет режим в сессию
+   * - передаёт управление дальше
    */
   async setMode(ctx: SamometerContext, next: NextFunction) {
     const [, ctxMode, , listId] = ctx.match;
 
-    await this._changeMode(ctx, (Mode as any)[ctxMode], listId);
+    await this._changeMode(ctx, (ctxMode as Mode), listId);
 
     return next();
   }
 
+  /**
+   * Переключение между суб-режимами
+   */
+  async setSubMode(ctx: SamometerContext, next: NextFunction) {
+    const [, ctxSubMode] = ctx.match;
+
+    ctx.session.subMode = (ctxSubMode as SubMode);
+
+    return next();
+  }
+
+  /**
+   * Смена режима
+   * - сохраняет в сессии режим
+   * - заполняет в сессии listId
+   * - удаляет старое сообщение по session.messageId
+   */
   async _changeMode(ctx: SamometerContext, mode: Mode, listId?: string) {
     ctx.session.mode = mode;
+    ctx.session.subMode = SubMode.basic;
 
     if (!isNaN(Number(listId))) {
       ctx.session.listId = Number(listId);
     }
+
     /*
      * Удаляем старое сообщение:
-     * - если это команда /list, то хотят новый список - либо нет сообщение, либо оно уехало наверх
+     * - если это команда /list, то хотят новый список - либо нет сообщения, либо оно уехало наверх
      * - если это смена режима, то проще удалить и создать заново, чем редактировать текст и кнопки
      */
     if (ctx.session.messageId) {

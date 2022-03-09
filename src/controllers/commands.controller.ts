@@ -36,7 +36,6 @@ class CommandsController {
    * Help
    */
   async help(ctx: SamometerContext) {
-    console.log(HELP_TEXT);
     return ctx.reply(HELP_TEXT, { parse_mode: 'MarkdownV2' });
   }
 }

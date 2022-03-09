@@ -1,13 +1,15 @@
 import { Bot, NextFunction } from 'grammy';
 import listsView from '../views/lists.view';
 import listRepository from '../repositories/list.repository';
-import { SamometerContext } from './session.controller';
+import { SamometerContext, Mode, SubMode } from './session.controller';
 
 class ListsController {
-  private mode: string;
+  private mode: Mode;
+  private subMode: SubMode;
 
   constructor() {
-    this.mode = 'lists';
+    this.mode = Mode.lists;
+    this.subMode = SubMode.basic;
   }
 
   init(bot: Bot) {
@@ -16,6 +18,9 @@ class ListsController {
 
     // Добавление нового списка
     bot.on('message', this.add.bind(this));
+
+    // Смена суб-режима
+    bot.callbackQuery(/^submode-(\w+)$/, this.setSubMode.bind(this));
   }
 
   async add(ctx: SamometerContext, next: NextFunction) {
@@ -40,15 +45,33 @@ class ListsController {
     return this._updateList(ctx);
   }
 
+  /**
+   * Переключение между суб-режимами
+   */
+  async setSubMode(ctx: SamometerContext) {
+    if (this.subMode === ctx.session.subMode) {
+      return;
+    }
+
+    this.subMode = ctx.session.subMode;
+
+    // Обновляем список
+    return this._updateList(ctx);
+  }
+
   async _updateList(ctx: SamometerContext) {
-    const listRender = await listsView.render(ctx.from.id);
+    const listRender = await listsView.render(ctx.from.id, this.subMode);
 
     if (ctx.session.messageId) {
       // Обновляем сообщение со списком
-      const [, markup] = listRender;
-      await ctx.api.editMessageReplyMarkup(ctx.chat.id, ctx.session.messageId, markup)
+      const [text, markup] = listRender;
+      await Promise.all([
+        ctx.api.editMessageText(ctx.chat.id, ctx.session.messageId, text, { parse_mode: 'MarkdownV2' }),
+        ctx.api.editMessageReplyMarkup(ctx.chat.id, ctx.session.messageId, markup),
+      ])
         .catch((err) => {
           /* Список не поменялся */
+          console.log('_updateList() error', err);
         });
 
     } else {
