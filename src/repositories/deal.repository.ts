@@ -42,9 +42,7 @@ class DealRepository {
     return this.dealModel.updateMany({
       where: {
         listId,
-        doneAt: {
-          not: null,
-        },
+        doneAt: { not: null },
       },
       data: {
         deleted: true,

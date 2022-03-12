@@ -115,10 +115,13 @@ class ListRepository {
     }
   }
 
-  async deleteById(id: number) {
-    return this.model.delete({
+  async setDeleted(id: number) {
+    return this.model.update({
       where: {
         id,
+      },
+      data: {
+        deleted: true,
       },
     });
   }

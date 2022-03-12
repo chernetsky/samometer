@@ -22,8 +22,8 @@ class ListsView {
   appendServiceButtons(keyboard: InlineKeyboard, subMode: SubMode) {
     if (subMode === SubMode.basic) {
       keyboard
-        .text(`⏹${BUTTON_SPACE_SEPARATOR}Удалить`, 'submode-delete')
-        .text(`Поделиться${BUTTON_SPACE_SEPARATOR}↔️`, 'submode-share');
+        .text(`❌${BUTTON_SPACE_SEPARATOR}Удалить`, 'submode-delete')
+        .text(`Поделиться${BUTTON_SPACE_SEPARATOR}🔁`, 'submode-share');
     } else {
       keyboard.text(`⬅️${BUTTON_SPACE_SEPARATOR}Назад`, 'submode-basic');
     }

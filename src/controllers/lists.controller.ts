@@ -71,6 +71,8 @@ class ListsController {
     return ctx.reply('Скоро можно будет делиться списками...');
     // console.log('Share', dealId);
 
+    // this.subMode = SubMode.basic;
+
     // Обновляем список
     // return this._updateList(ctx);
   }
@@ -78,7 +80,10 @@ class ListsController {
   async delete(ctx: SamometerContext) {
     const [, listId] = ctx.match;
 
-    await listRepository.deleteById(Number(listId));
+    // Удаляем сам список
+    await listRepository.setDeleted(Number(listId));
+
+    this.subMode = SubMode.basic;
 
     // Обновляем список
     return this._updateList(ctx);
