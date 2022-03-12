@@ -21,6 +21,12 @@ class ListsController {
 
     // Смена суб-режима
     bot.callbackQuery(/^submode-(\w+)$/, this.setSubMode.bind(this));
+
+    // Поделиться
+    bot.callbackQuery(/^lists-share-(\d+)$/, this.share.bind(this));
+
+    // Удалить
+    bot.callbackQuery(/^lists-delete-(\d+)$/, this.delete.bind(this));
   }
 
   async add(ctx: SamometerContext, next: NextFunction) {
@@ -54,6 +60,25 @@ class ListsController {
     }
 
     this.subMode = ctx.session.subMode;
+
+    // Обновляем список
+    return this._updateList(ctx);
+  }
+
+  async share(ctx: SamometerContext) {
+    const [, listId] = ctx.match;
+
+    return ctx.reply('Скоро можно будет делиться списками...');
+    // console.log('Share', dealId);
+
+    // Обновляем список
+    // return this._updateList(ctx);
+  }
+
+  async delete(ctx: SamometerContext) {
+    const [, listId] = ctx.match;
+
+    await listRepository.deleteById(Number(listId));
 
     // Обновляем список
     return this._updateList(ctx);

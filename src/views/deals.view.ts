@@ -2,6 +2,7 @@ import { InlineKeyboard } from 'grammy';
 import type { ParseMode } from '@grammyjs/types';
 import dealRepository from '../repositories/deal.repository';
 import listRepository from '../repositories/list.repository';
+import { BUTTON_SPACE_SEPARATOR } from '../constants';
 
 class DealsView {
   maxTextName: number;
@@ -31,8 +32,8 @@ class DealsView {
 
   appendServiceButtons(keyboard: InlineKeyboard) {
     return keyboard
-      .text('🆗        Очистить', 'clear-list')
-      .text('Списки        ⤴️', 'mode-lists')
+      .text(`🆗${BUTTON_SPACE_SEPARATOR}Очистить`, 'clear-list')
+      .text(`Списки${BUTTON_SPACE_SEPARATOR}⤴️`, 'mode-lists')
       .row();
   }
 

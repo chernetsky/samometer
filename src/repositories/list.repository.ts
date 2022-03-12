@@ -114,6 +114,14 @@ class ListRepository {
       });
     }
   }
+
+  async deleteById(id: number) {
+    return this.model.delete({
+      where: {
+        id,
+      },
+    });
+  }
 }
 
 export default new ListRepository(db.client);
