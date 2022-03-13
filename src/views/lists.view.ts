@@ -1,6 +1,6 @@
 import { SubMode } from '../controllers/session.controller';
 import { InlineKeyboard } from 'grammy';
-import listRepository from '../repositories/list.repository';
+import listRepository, { WithUsersCount } from '../repositories/list.repository';
 import { BUTTON_SPACE_SEPARATOR } from '../constants';
 import { List } from '@prisma/client';
 
@@ -9,6 +9,7 @@ class ListsView {
     Promise<[string, { reply_markup: InlineKeyboard, parse_mode: string }]> {
     const lists = await listRepository.getListsByUserId(userId);
 
+    console.log('lists', lists);
     const listKeyboard = new InlineKeyboard();
 
     lists.forEach(list =>
@@ -47,25 +48,25 @@ class ListsView {
     return title;
   }
 
-  _renderListButton(subMode: SubMode, list: List): [string, string] {
-    const { id, name } = list;
+  _renderListButton(subMode: SubMode, list: WithUsersCount<List>): [string, string] {
+    // todo: Добавить тип
+    const { id, name, _count: { users } } = list;
 
-    // todo: Узнать может ли призма добавлять в выборки виртуальные поля и как это с тс
-    // const shared = '🌐';
+    const shared = `${users > 1 ? '🌐 ' : ''}`;
 
     let renderedTitle;
     let callbackQueryStr;
     switch (subMode) {
       case SubMode.delete:
-        renderedTitle = `${name}${BUTTON_SPACE_SEPARATOR}❌`;
+        renderedTitle = `${shared}${name}${BUTTON_SPACE_SEPARATOR}❌`;
         callbackQueryStr = `lists-delete-${id}`;
         break;
       case SubMode.share:
-        renderedTitle = `${name}${BUTTON_SPACE_SEPARATOR}🔁`;
+        renderedTitle = `${shared}${name}${BUTTON_SPACE_SEPARATOR}🔁`;
         callbackQueryStr = `lists-share-${id}`;
         break;
       default:
-        renderedTitle = name;
+        renderedTitle = `${shared}${name}`;
         callbackQueryStr = `mode-deals-${id}`;
     }
 
