@@ -38,7 +38,7 @@ class DealsView {
   }
 
   _renderTitle(listName: string): string {
-    return `Список дел: *${listName}*`;
+    return `СПИСОК: *${listName}*`;
   }
 
   _renderDealText(text: string, done: boolean): string {

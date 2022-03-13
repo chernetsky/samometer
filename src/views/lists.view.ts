@@ -2,6 +2,7 @@ import { SubMode } from '../controllers/session.controller';
 import { InlineKeyboard } from 'grammy';
 import listRepository from '../repositories/list.repository';
 import { BUTTON_SPACE_SEPARATOR } from '../constants';
+import { List } from '@prisma/client';
 
 class ListsView {
   async render(userId: number, subMode: SubMode | null):
@@ -10,8 +11,8 @@ class ListsView {
 
     const listKeyboard = new InlineKeyboard();
 
-    lists.forEach(l =>
-      listKeyboard.text.apply(listKeyboard, this._renderListButton(subMode, l.name, l.id))
+    lists.forEach(list =>
+      listKeyboard.text.apply(listKeyboard, this._renderListButton(subMode, list))
         .row());
 
     this.appendServiceButtons(listKeyboard, subMode);
@@ -22,7 +23,7 @@ class ListsView {
   appendServiceButtons(keyboard: InlineKeyboard, subMode: SubMode) {
     if (subMode === SubMode.basic) {
       keyboard
-        .text(`❌${BUTTON_SPACE_SEPARATOR}Удалить`, 'submode-delete')
+        .text(`🚮${BUTTON_SPACE_SEPARATOR}Удалить`, 'submode-delete')
         .text(`Поделиться${BUTTON_SPACE_SEPARATOR}🔁`, 'submode-share');
     } else {
       keyboard.text(`⬅️${BUTTON_SPACE_SEPARATOR}Назад`, 'submode-basic');
@@ -46,20 +47,25 @@ class ListsView {
     return title;
   }
 
-  _renderListButton(subMode: SubMode, text: string, id: number): [string, string] {
+  _renderListButton(subMode: SubMode, list: List): [string, string] {
+    const { id, name } = list;
+
+    // todo: Узнать может ли призма добавлять в выборки виртуальные поля и как это с тс
+    // const shared = '🌐';
+
     let renderedTitle;
     let callbackQueryStr;
     switch (subMode) {
       case SubMode.delete:
-        renderedTitle = `${text}${BUTTON_SPACE_SEPARATOR}❌`;
+        renderedTitle = `${name}${BUTTON_SPACE_SEPARATOR}❌`;
         callbackQueryStr = `lists-delete-${id}`;
         break;
       case SubMode.share:
-        renderedTitle = `${text}${BUTTON_SPACE_SEPARATOR}🔁`;
+        renderedTitle = `${name}${BUTTON_SPACE_SEPARATOR}🔁`;
         callbackQueryStr = `lists-share-${id}`;
         break;
       default:
-        renderedTitle = text;
+        renderedTitle = name;
         callbackQueryStr = `mode-deals-${id}`;
     }
 
