@@ -9,11 +9,11 @@ class ListsView {
     Promise<[string, { reply_markup: InlineKeyboard, parse_mode: string }]> {
     const lists = await listRepository.getListsByUserId(userId);
 
-    console.log('lists', lists);
     const listKeyboard = new InlineKeyboard();
 
     lists.forEach(list =>
       listKeyboard.text.apply(listKeyboard, this._renderListButton(subMode, list))
+        .switchInline('share', `share-${list.id}`)
         .row());
 
     this.appendServiceButtons(listKeyboard, subMode);
