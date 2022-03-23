@@ -52,8 +52,10 @@ class ListsController {
     } as InlineQueryResultArticle;
 
     bot.inlineQuery(/^lists-share-(\d+)$/, (ctx) => {
+      // return ctx.reply('Скоро можно будет делиться списками...');
+
       // console.log('Processing inline query', ctx.match, ctx.update?.inline_query);
-      return ctx.answerInlineQuery([shareListAnswer]);
+      // return ctx.answerInlineQuery([shareListAnswer]);
     });
 
     bot.callbackQuery(/^share-(accept|decline)-(\d+)$/, async (ctx) => {
@@ -86,21 +88,6 @@ class ListsController {
     await ctx.deleteMessage();
 
     next();
-
-    // Обновляем список
-    // return this.update(ctx);
-  }
-
-  async share(ctx: SamometerContext) {
-    const [, listId] = ctx.match;
-
-    return ctx.reply('Скоро можно будет делиться списками...');
-    // console.log('Share', dealId);
-
-    // this.subMode = SubMode.basic;
-
-    // Обновляем список
-    // return this.update(ctx);
   }
 
   async delete(ctx: SamometerContext, next: NextFunction) {
@@ -109,10 +96,11 @@ class ListsController {
     // Удаляем сам список
     await listRepository.setDeleted(Number(listId));
 
+    // Возвращаемся в обычный режим
     ctx.session.subMode = SubMode.basic;
 
     if (Number(listId) === ctx.session.listId) {
-      // Удаление текущего списка
+      // Удаление текущего списка - стираем в сессии текущий
       ctx.session.listId = null;
     }
 
