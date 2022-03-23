@@ -3,6 +3,7 @@ import type { ParseMode } from '@grammyjs/types';
 import dealRepository from '../repositories/deal.repository';
 import listRepository from '../repositories/list.repository';
 import { BUTTON_SPACE_SEPARATOR } from '../constants';
+import { escapeMarkdown } from '../utils';
 
 class DealsView {
   maxTextName: number;
@@ -38,7 +39,7 @@ class DealsView {
   }
 
   _renderTitle(listName: string): string {
-    return `СПИСОК: *${listName}*`;
+    return `СПИСОК: *${escapeMarkdown(listName)}*`;
   }
 
   _renderDealText(text: string, done: boolean): string {

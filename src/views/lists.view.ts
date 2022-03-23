@@ -1,24 +1,24 @@
-import { SubMode } from '../controllers/session.controller';
 import { InlineKeyboard } from 'grammy';
+import { List } from '@prisma/client';
+import { SamometerContext, SubMode } from '../controllers/session.controller';
 import listRepository, { WithUsersCount } from '../repositories/list.repository';
 import { BUTTON_SPACE_SEPARATOR } from '../constants';
-import { List } from '@prisma/client';
 
 class ListsView {
-  async render(userId: number, subMode: SubMode | null):
-    Promise<[string, { reply_markup: InlineKeyboard, parse_mode: string }]> {
-    const lists = await listRepository.getListsByUserId(userId);
+  async render(ctx: SamometerContext): Promise<[string, { reply_markup: InlineKeyboard, parse_mode: string }]> {
+    const { listId: currentListId, subMode } = ctx.session;
+    const keyboard = new InlineKeyboard();
 
-    const listKeyboard = new InlineKeyboard();
+    // Получаем списки юзера
+    const lists = await listRepository.getListsByUserId(ctx.from.id);
 
-    lists.forEach(list =>
-      listKeyboard.text.apply(listKeyboard, this._renderListButton(subMode, list))
-        .switchInline('share', `share-${list.id}`)
-        .row());
+    // Ренерим кнопки списков
+    lists.forEach(this._renderListButton.bind(this, keyboard, subMode, currentListId));
 
-    this.appendServiceButtons(listKeyboard, subMode);
+    // Рендерим кнопки управления
+    this.appendServiceButtons(keyboard, subMode);
 
-    return [this._renderTitle(subMode), { reply_markup: listKeyboard, parse_mode: 'MarkdownV2' }];
+    return [this._renderTitle(subMode), { reply_markup: keyboard, parse_mode: 'MarkdownV2' }];
   }
 
   appendServiceButtons(keyboard: InlineKeyboard, subMode: SubMode) {
@@ -33,7 +33,7 @@ class ListsView {
     return keyboard.row();
   }
 
-  _renderTitle(subMode: SubMode | null): string {
+  _renderTitle(subMode: SubMode): string {
     let title;
     switch (subMode) {
       case SubMode.delete:
@@ -48,29 +48,34 @@ class ListsView {
     return title;
   }
 
-  _renderListButton(subMode: SubMode, list: WithUsersCount<List>): [string, string] {
-    // todo: Добавить тип
+  _renderListButton(keyboard: InlineKeyboard, subMode: SubMode, currentListId: number, list: WithUsersCount<List>) {
     const { id, name, _count: { users } } = list;
 
-    const shared = `${users > 1 ? '🌐 ' : ''}`;
+    // Иконки списка
+    const shared = users > 1 ? '🌐' : '';
+    const current = currentListId === id ? '⭐️' : '';
+    const icons = `${current}${shared} `;
 
     let renderedTitle;
     let callbackQueryStr;
     switch (subMode) {
       case SubMode.delete:
-        renderedTitle = `${shared}${name}${BUTTON_SPACE_SEPARATOR}❌`;
+        renderedTitle = `${icons}${name}${BUTTON_SPACE_SEPARATOR}❌`;
         callbackQueryStr = `lists-delete-${id}`;
+        keyboard.text(renderedTitle, callbackQueryStr);
         break;
       case SubMode.share:
-        renderedTitle = `${shared}${name}${BUTTON_SPACE_SEPARATOR}🔁`;
+        renderedTitle = `${icons}${name}`;
         callbackQueryStr = `lists-share-${id}`;
+        keyboard.switchInline(renderedTitle, callbackQueryStr);
         break;
       default:
-        renderedTitle = `${shared}${name}`;
+        renderedTitle = `${icons}${name}`;
         callbackQueryStr = `mode-deals-${id}`;
+        keyboard.text(renderedTitle, callbackQueryStr);
     }
 
-    return [renderedTitle, callbackQueryStr];
+    keyboard.row();
   }
 }
 

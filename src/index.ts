@@ -11,10 +11,10 @@ function bootstrap() {
 
   [
     commandsController,
-    // sessionController,
-    // dealsController,
-    // listsController,
-    // errorsController,
+    sessionController,
+    dealsController,
+    listsController,
+    errorsController,
   ].forEach(c => c.init(bot));
 
   bot.start();

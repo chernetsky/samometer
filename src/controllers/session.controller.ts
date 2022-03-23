@@ -60,7 +60,11 @@ class SessionController {
   async buttonMiddleware(ctx: SamometerContext, next: NextFunction) {
     await ctx.answerCallbackQuery();
 
-    await deleteNotTrackingMessage(ctx);
+    if (!ctx.update.inline_query) {
+      await deleteNotTrackingMessage(ctx).catch((err) => {
+        // Может упасть при inline_query, т.к. там нет сессии
+      });
+    }
 
     return next();
   }
@@ -69,13 +73,18 @@ class SessionController {
    * Заполнение session.listId
    */
   async setListId(ctx: SamometerContext, next: NextFunction) {
-    if (!ctx.session.listId) {
-      const listId = await listRepository.getCurrentListId(ctx.from.id);
-      if (!listId) {
-        return ctx.reply('У вас нет ни одного списка. Нажмите /start, чтобы начать.');
-      }
+    try {
+      if (!ctx.update.inline_query && !ctx.session.listId) {
+        const listId = await listRepository.getCurrentListId(ctx.from.id);
+        if (!listId) {
+          return ctx.reply('У вас нет ни одного списка. Нажмите /start, чтобы начать.');
+        }
 
-      ctx.session.listId = listId;
+        ctx.session.listId = listId;
+      }
+    } catch (err) {
+      // При inline_query сессии нет. Может ещё при каких-то типах запросов.
+      console.log('Error session processing', ctx);
     }
 
     return next();

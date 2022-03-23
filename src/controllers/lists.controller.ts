@@ -1,32 +1,70 @@
-import { Bot, NextFunction } from 'grammy';
+import { Bot, InlineKeyboard, NextFunction } from 'grammy';
 import listsView from '../views/lists.view';
 import listRepository from '../repositories/list.repository';
 import { SamometerContext, Mode, SubMode } from './session.controller';
+import { InlineQueryResultArticle } from '@grammyjs/types';
 
 class ListsController {
   private mode: Mode;
-  private subMode: SubMode;
 
   constructor() {
+    // Режим для этого контроллера
     this.mode = Mode.lists;
-    this.subMode = SubMode.basic;
   }
 
   init(bot: Bot) {
     // Вывод списка
-    bot.callbackQuery('mode-lists', this._updateList.bind(this));
-
-    // Добавление нового списка
-    bot.on('message', this.add.bind(this));
+    bot.callbackQuery(
+      'mode-lists',
+      this.update.bind(this));
 
     // Смена суб-режима
-    bot.callbackQuery(/^submode-(\w+)$/, this.setSubMode.bind(this));
+    bot.callbackQuery(
+      /^submode-\w+$/,
+      this.update.bind(this));
 
-    // Поделиться
-    bot.callbackQuery(/^lists-share-(\d+)$/, this.share.bind(this));
+    // Удаление списка
+    bot.callbackQuery(
+      /^lists-delete-(\d+)$/,
+      this.delete.bind(this),
+      this.update.bind(this));
 
-    // Удалить
-    bot.callbackQuery(/^lists-delete-(\d+)$/, this.delete.bind(this));
+    // Добавление нового списка
+    bot.on(
+      'message',
+      this.add.bind(this),
+      this.update.bind(this));
+
+    // todo: dev share
+    const shareListAnswer = {
+      type: 'article',
+      id: 'share-1',
+      title: 'Поделиться списком Таким-то',
+      input_message_content: {
+        message_text: 'С вами хотят поделиться списком *Таким\\-то* через бот @SamometerBot\nПримите приглашение и установите @SamometerBot\\, чтобы начать им пользоваться\\. Либо просто отклоните приглашение\\.',
+        parse_mode: 'MarkdownV2',
+      },
+      reply_markup: (new InlineKeyboard())
+        .text('Принять', 'share-accept-10')
+        .text('Отклонить', 'share-decline-10')
+        .row(),
+
+    } as InlineQueryResultArticle;
+
+    bot.inlineQuery(/^lists-share-(\d+)$/, (ctx) => {
+      // console.log('Processing inline query', ctx.match, ctx.update?.inline_query);
+      return ctx.answerInlineQuery([shareListAnswer]);
+    });
+
+    bot.callbackQuery(/^share-(accept|decline)-(\d+)$/, async (ctx) => {
+      const [, action, id] = ctx.match;
+      // console.log(action === 'accept' ? 'Вы приняли приглашение' : 'Сорян');
+
+      await ctx.answerCallbackQuery();
+
+      // console.log(ctx, ctx.from.id, ctx.update.callback_query.from.id);
+      // return ctx.api.sendMessage(ctx.from.id, action);
+    });
   }
 
   async add(ctx: SamometerContext, next: NextFunction) {
@@ -47,22 +85,10 @@ class ListsController {
     // Удаляем текущее сообщение
     await ctx.deleteMessage();
 
-    // Обновляем список
-    return this._updateList(ctx);
-  }
-
-  /**
-   * Переключение между суб-режимами
-   */
-  async setSubMode(ctx: SamometerContext) {
-    if (this.subMode === ctx.session.subMode) {
-      return;
-    }
-
-    this.subMode = ctx.session.subMode;
+    next();
 
     // Обновляем список
-    return this._updateList(ctx);
+    // return this.update(ctx);
   }
 
   async share(ctx: SamometerContext) {
@@ -74,23 +100,27 @@ class ListsController {
     // this.subMode = SubMode.basic;
 
     // Обновляем список
-    // return this._updateList(ctx);
+    // return this.update(ctx);
   }
 
-  async delete(ctx: SamometerContext) {
+  async delete(ctx: SamometerContext, next: NextFunction) {
     const [, listId] = ctx.match;
 
     // Удаляем сам список
     await listRepository.setDeleted(Number(listId));
 
-    this.subMode = SubMode.basic;
+    ctx.session.subMode = SubMode.basic;
 
-    // Обновляем список
-    return this._updateList(ctx);
+    if (Number(listId) === ctx.session.listId) {
+      // Удаление текущего списка
+      ctx.session.listId = null;
+    }
+
+    next();
   }
 
-  async _updateList(ctx: SamometerContext) {
-    const listRender = await listsView.render(ctx.from.id, this.subMode);
+  async update(ctx: SamometerContext) {
+    const listRender = await listsView.render(ctx);
 
     if (ctx.session.messageId) {
       // Обновляем сообщение со списком
@@ -101,7 +131,7 @@ class ListsController {
       ])
         .catch((err) => {
           /* Список не поменялся */
-          console.log('_updateList() error', err);
+          console.log('update() error', err);
         });
 
     } else {
