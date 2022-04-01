@@ -58,6 +58,7 @@ class SessionController {
    * то это сообщение удаляется, и действия передаются актуальному сообщению.
    */
   async buttonMiddleware(ctx: SamometerContext, next: NextFunction) {
+    console.log('FIRST BUTTON MIDDLEWARE');
     await ctx.answerCallbackQuery();
 
     if (!ctx.update.inline_query) {

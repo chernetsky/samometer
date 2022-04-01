@@ -66,7 +66,8 @@ class ListsView {
         break;
       case SubMode.share:
         renderedTitle = `${icons}${name}`;
-        callbackQueryStr = `lists-share-${id}`;
+
+        callbackQueryStr = `invite-${id}`;
         keyboard.switchInline(renderedTitle, callbackQueryStr);
         break;
       default:
