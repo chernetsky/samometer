@@ -1,0 +1,31 @@
+import { randomUUID } from 'crypto';
+import db from '../providers/db';
+import { Invite, Prisma, PrismaClient } from '@prisma/client';
+
+class InviteRepository {
+  model: Prisma.InviteDelegate<Prisma.RejectOnNotFound | Prisma.RejectPerOperation>;
+
+  constructor(dbClient: PrismaClient) {
+    this.model = dbClient.invite;
+  }
+
+  getByGuid(guid: string): Promise<Invite> {
+    return this.model.findFirst({
+      where: {
+        guid,
+      },
+    });
+  }
+
+  create(listId: number) {
+    const guid = randomUUID();
+    return this.model.create({
+      data: {
+        guid,
+        listId,
+      },
+    });
+  }
+}
+
+export default new InviteRepository(db.client);

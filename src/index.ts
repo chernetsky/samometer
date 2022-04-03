@@ -4,6 +4,7 @@ import commandsController from './controllers/commands.controller';
 import errorsController from './controllers/errors.controller';
 import dealsController from './controllers/deals.controller';
 import listsController from './controllers/lists.controller';
+import inviteController from './controllers/invite.controller';
 import sessionController, { SamometerContext } from './controllers/session.controller';
 
 function bootstrap() {
@@ -14,6 +15,7 @@ function bootstrap() {
     sessionController,
     dealsController,
     listsController,
+    inviteController,
     errorsController,
   ].forEach(c => c.init(bot));
 

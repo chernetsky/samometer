@@ -12,7 +12,7 @@ export enum Mode {
 export enum SubMode {
   basic = 'basic',
   delete = 'delete',
-  share = 'share',
+  invite = 'invite',
 }
 
 interface SessionData {

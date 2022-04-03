@@ -25,7 +25,7 @@ class ListsView {
     if (subMode === SubMode.basic) {
       keyboard
         .text(`🚮${BUTTON_SPACE_SEPARATOR}Удалить`, 'submode-delete')
-        .text(`Поделиться${BUTTON_SPACE_SEPARATOR}🔁`, 'submode-share');
+        .text(`Поделиться${BUTTON_SPACE_SEPARATOR}🔁`, 'submode-invite');
     } else {
       keyboard.text(`⬅️${BUTTON_SPACE_SEPARATOR}Назад`, 'submode-basic');
     }
@@ -39,7 +39,7 @@ class ListsView {
       case SubMode.delete:
         title = '*УДАЛИТЬ СПИСОК*';
         break;
-      case SubMode.share:
+      case SubMode.invite:
         title = '*ПОДЕЛИТЬСЯ СПИСКОМ*';
         break;
       default:
@@ -64,7 +64,7 @@ class ListsView {
         callbackQueryStr = `lists-delete-${id}`;
         keyboard.text(renderedTitle, callbackQueryStr);
         break;
-      case SubMode.share:
+      case SubMode.invite:
         renderedTitle = `${icons}${name}`;
 
         callbackQueryStr = `invite-${id}`;

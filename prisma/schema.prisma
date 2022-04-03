@@ -33,6 +33,7 @@ model List {
   deleted   Boolean  @default(false)
   users     User[]   @relation(references: [id])
   deals     Deal[]
+  invites   Invite[]
 
   @@map("lists")
 }
@@ -49,7 +50,13 @@ model Deal {
   @@map("deals")
 }
 
-// model Session {
-//   id String @id
+model Invite {
+  id        Int      @id @default(autoincrement())
+  guid      String   @db.Char(36)
+  list      List     @relation(fields: [listId], references: [id])
+  listId    Int
+  createdAt DateTime @default(now())
 
-// }
+  @@index([guid])
+  @@map("invites")
+}
