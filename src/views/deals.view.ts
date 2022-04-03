@@ -13,7 +13,7 @@ class DealsView {
   }
 
   async render(listId: number): Promise<[string, { reply_markup: InlineKeyboard, parse_mode: ParseMode }]> {
-    const list = await listRepository.getListById(listId);
+    const list = await listRepository.getById(listId);
 
     if (list) {
       const listKeyboard = new InlineKeyboard();

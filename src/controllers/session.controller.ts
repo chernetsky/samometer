@@ -58,7 +58,6 @@ class SessionController {
    * то это сообщение удаляется, и действия передаются актуальному сообщению.
    */
   async buttonMiddleware(ctx: SamometerContext, next: NextFunction) {
-    console.log('FIRST BUTTON MIDDLEWARE');
     await ctx.answerCallbackQuery();
 
     if (!ctx.update.inline_query) {
@@ -75,7 +74,7 @@ class SessionController {
    */
   async setListId(ctx: SamometerContext, next: NextFunction) {
     try {
-      if (!ctx.update.inline_query && !ctx.session.listId) {
+      if (ctx?.chat?.id && !ctx.update.inline_query && !ctx.session.listId) {
         const listId = await listRepository.getCurrentListId(ctx.from.id);
         if (!listId) {
           return ctx.reply('У вас нет ни одного списка. Нажмите /start, чтобы начать.');
@@ -85,7 +84,7 @@ class SessionController {
       }
     } catch (err) {
       // При inline_query сессии нет. Может ещё при каких-то типах запросов.
-      console.log('Error session processing', ctx);
+      console.log('Error session processing', err, ctx);
     }
 
     return next();

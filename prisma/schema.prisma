@@ -25,16 +25,17 @@ model User {
 
 model List {
   id        Int      @id @default(autoincrement())
-  userId    Int? // DEPRECATED
   name      String
   specialId String? // Samometer special lists Id
   tracking  Boolean  @default(true)
   createdAt DateTime @default(now())
   deleted   Boolean  @default(false)
+  guid      String?  @db.Char(36) // invite guid
   users     User[]   @relation(references: [id])
   deals     Deal[]
   invites   Invite[]
 
+  @@index([guid])
   @@map("lists")
 }
 

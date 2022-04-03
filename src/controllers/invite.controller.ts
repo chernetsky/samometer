@@ -4,39 +4,40 @@ import inviteRepository from '../repositories/invite.repository';
 import { SamometerContext } from './session.controller';
 import { InlineQueryResultArticle } from '@grammyjs/types';
 import { escapeMarkdown } from '../utils';
+import { UUID_REGEX } from '../constants';
 
 class InviteController {
   init(bot: Bot) {
     // inline команда на добавление списка
-    bot.inlineQuery(/^invite-(\d+)$/, this.invite.bind(this));
+    bot.inlineQuery(new RegExp(`^invite-(${UUID_REGEX})$`, 'i'), this.invite.bind(this));
 
     // Ответы на приглашение
-    bot.callbackQuery(/^invite-accept-([\w-]*\.[\w-]*\.[\w-]*)$/, this.inviteAccept.bind(this));
-    bot.callbackQuery(/^invite-decline$/, this.inviteDecline.bind(this));
+    bot.callbackQuery(new RegExp(`^invite-accept-(${UUID_REGEX})$`, 'i'), this.inviteAccept.bind(this));
+    bot.callbackQuery(new RegExp(`^invite-decline-(${UUID_REGEX})$`, 'i'), this.inviteDecline.bind(this));
   }
 
   async invite(ctx: SamometerContext) {
-    console.log('invite query', ctx.match, ctx.update?.inline_query);
+    const [, guid] = ctx.match;
 
-    const [, listId] = ctx.match;
+    const list = await listRepository.getByGuid(guid);
 
-    const invite = await inviteRepository.create(Number(listId));
+    if (!list) {
+      // Неправильный пригласительный guid
+      return;
+    }
 
-    const list = await listRepository.getListById(Number(listId));
+    // Создаём приглашение
+    const invite = await inviteRepository.create(guid, list.id);
 
     const answer = this._generateInviteAnswer(invite.guid, list.name);
-
-    console.log('inviteAnswer', answer);
-
     return ctx.answerInlineQuery([answer]);
   }
 
   inviteAccept(ctx: SamometerContext) {
-    // todo: Удалить запись в инвайтах
+    const [, guid] = ctx.match;
+    // Проверяем наличие приглашения и его актуальность
 
-    const [, token] = ctx.match;
-    console.log('answer', ctx, token);
-    console.log('token', token);
+    // todo: Удаляем приглашение
 
     // todo: верифицировать токен
     // try {
@@ -49,12 +50,16 @@ class InviteController {
 
     // todo: выдать юзеру список
 
-    return ctx.reply('Ok');
+    // todo: Ответ об успешном приглашении
   }
 
-  inviteDecline(ctx: SamometerContext) {
-    // todo: Удалить запись в инвайтах
-    return ctx.reply('Sorry no');
+  async inviteDecline(ctx: SamometerContext) {
+    const [, guid] = ctx.match;
+
+    await inviteRepository.delete(guid);
+
+    // todo: Поэкспериментировать с ответами: ответ приглашающему, ответ приглашаемому
+    // return ctx.reply('Sorry no');
   }
 
   _generateInviteAnswer(guid: string, listName: string): InlineQueryResultArticle {
@@ -68,7 +73,7 @@ class InviteController {
       },
       reply_markup: (new InlineKeyboard())
         .text('Принять', `invite-accept-${guid}`)
-        .text('Отклонить', 'invite-decline')
+        .text('Отклонить', `invite-decline-${guid}`)
         .row(),
     } as InlineQueryResultArticle;
 

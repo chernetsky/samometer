@@ -13,7 +13,9 @@ class ListsView {
     const lists = await listRepository.getListsByUserId(ctx.from.id);
 
     // Ренерим кнопки списков
-    lists.forEach(this._renderListButton.bind(this, keyboard, subMode, currentListId));
+    for (const list of lists) {
+      await this._renderListButton(keyboard, subMode, currentListId, list);
+    }
 
     // Рендерим кнопки управления
     this.appendServiceButtons(keyboard, subMode);
@@ -48,7 +50,12 @@ class ListsView {
     return title;
   }
 
-  _renderListButton(keyboard: InlineKeyboard, subMode: SubMode, currentListId: number, list: WithUsersCount<List>) {
+  async _renderListButton(
+    keyboard: InlineKeyboard,
+    subMode: SubMode,
+    currentListId: number,
+    list: WithUsersCount<List>) {
+
     const { id, name, _count: { users } } = list;
 
     // Иконки списка
@@ -67,7 +74,10 @@ class ListsView {
       case SubMode.invite:
         renderedTitle = `${icons}${name}`;
 
-        callbackQueryStr = `invite-${id}`;
+        // Обновляем у списка guid
+        const guid = await listRepository.updateGuid(id);
+        callbackQueryStr = `invite-${guid}`;
+
         keyboard.switchInline(renderedTitle, callbackQueryStr);
         break;
       default:

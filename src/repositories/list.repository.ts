@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import db from '../providers/db';
 import { List, Prisma, PrismaClient } from '@prisma/client';
 import { LIST_SPECIAL, LIST_SPECIAL_DESCRIPTORS } from '../constants';
@@ -14,10 +15,18 @@ class ListRepository {
     this.model = dbClient.list;
   }
 
-  getListById(id: number): Promise<List> {
+  getById(id: number): Promise<List> {
     return this.model.findUnique({
       where: {
         id,
+      },
+    });
+  }
+
+  getByGuid(guid: string): Promise<List> {
+    return this.model.findFirst({
+      where: {
+        guid,
       },
     });
   }
@@ -130,7 +139,7 @@ class ListRepository {
     }
   }
 
-  async setDeleted(id: number) {
+  setDeleted(id: number) {
     return this.model.update({
       where: {
         id,
@@ -139,6 +148,21 @@ class ListRepository {
         deleted: true,
       },
     });
+  }
+
+  async updateGuid(id: number) {
+    const guid = randomUUID();
+
+    await this.model.update({
+      where: {
+        id,
+      },
+      data: {
+        guid,
+      },
+    });
+
+    return guid;
   }
 }
 
