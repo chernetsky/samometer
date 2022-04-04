@@ -1,4 +1,4 @@
-import { Bot, InlineKeyboard, NextFunction } from 'grammy';
+import { Bot, InlineKeyboard } from 'grammy';
 import listRepository from '../repositories/list.repository';
 import inviteRepository from '../repositories/invite.repository';
 import { SamometerContext } from './session.controller';
@@ -27,7 +27,7 @@ class InviteController {
     }
 
     // Создаём приглашение
-    const invite = await inviteRepository.create(guid, list.id);
+    const invite = await inviteRepository.create(list.id);
 
     const answer = this._generateInviteAnswer(invite.guid, list.name);
     return ctx.answerInlineQuery([answer]);
@@ -53,13 +53,24 @@ class InviteController {
     // todo: Ответ об успешном приглашении
   }
 
+  /**
+   * Отклонение приглашения.
+   */
   async inviteDecline(ctx: SamometerContext) {
     const [, guid] = ctx.match;
 
-    await inviteRepository.delete(guid);
+    return Promise.all([
+      // Удалить приглашение
+      inviteRepository.delete(guid),
 
-    // todo: Поэкспериментировать с ответами: ответ приглашающему, ответ приглашаемому
-    // return ctx.reply('Sorry no');
+      // Поменять текст приглашения
+      ctx.api.editMessageText(null, null, 'Вы отклонили приглашение...', {
+        inline_message_id: ctx.inlineMessageId,
+      }),
+
+      // Написать ответ в бот-чат
+      ctx.api.sendMessage(ctx.from.id, 'Приглашение отклонили...'),
+    ]);
   }
 
   _generateInviteAnswer(guid: string, listName: string): InlineQueryResultArticle {

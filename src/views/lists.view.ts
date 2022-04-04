@@ -75,6 +75,7 @@ class ListsView {
         renderedTitle = `${icons}${name}`;
 
         // Обновляем у списка guid
+        // todo: Надо ли нам каждый раз его обновлять?
         const guid = await listRepository.updateGuid(id);
         callbackQueryStr = `invite-${guid}`;
 

@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import db from '../providers/db';
 import { Invite, Prisma, PrismaClient } from '@prisma/client';
 
@@ -16,7 +17,9 @@ class InviteRepository {
     });
   }
 
-  create(guid: string, listId: number) {
+  create(listId: number) {
+    const guid = randomUUID();
+
     return this.model.create({
       data: {
         guid,
