@@ -4,7 +4,7 @@ import inviteRepository from '../repositories/invite.repository';
 import { SamometerContext } from './session.controller';
 import { InlineQueryResultArticle } from '@grammyjs/types';
 import { escapeMarkdown } from '../utils';
-import { UUID_REGEX } from '../constants';
+import { INVITE_TTL, UUID_REGEX } from '../constants';
 
 class InviteController {
   init(bot: Bot) {
@@ -30,27 +30,39 @@ class InviteController {
     const invite = await inviteRepository.create(list.id);
 
     const answer = this._generateInviteAnswer(invite.guid, list.name);
+
     return ctx.answerInlineQuery([answer]);
   }
 
-  inviteAccept(ctx: SamometerContext) {
+  async inviteAccept(ctx: SamometerContext) {
     const [, guid] = ctx.match;
+
     // Проверяем наличие приглашения и его актуальность
+    const invite = await this._getActualInvite(guid);
 
-    // todo: Удаляем приглашение
+    if (!invite) {
+      // Нет приглашения или срок истёк
+      return ctx.api.editMessageText(null, null, 'Приглашение устарело. Попросите автора списка выдать вам новое.', {
+        inline_message_id: ctx.inlineMessageId,
+      });
+    }
 
-    // todo: верифицировать токен
-    // try {
-    //   console.log('verified', verified);
-    // } catch (err) {
-    //   console.log('Token is invalid');
+    // Выдать юзеру список
+    const userId = ctx.from.id;
+    console.log('inviteAccept', ctx.from);
 
-    //   // Выдать сообщение о том, что токен истёк
-    // }
+    // Создать пользователя, если такого нет
 
-    // todo: выдать юзеру список
+    // Привязать пользователя к списку
+    // todo: https://www.prisma.io/docs/concepts/components/prisma-client/relation-queries#connect-an-existing-record
 
-    // todo: Ответ об успешном приглашении
+    // Удалить инвайт
+    await inviteRepository.delete(guid);
+
+    return ctx.api.editMessageText(null, null, 'Теперь вы являетесь совладельцем списка *НАЗВАНИЕ СПИСКА*\\!\nЗапустите бот @SamometerBot и откройте список всех доступных списков\\, чтобы начать пользоваться новым списком\\.', {
+      inline_message_id: ctx.inlineMessageId,
+      parse_mode: 'MarkdownV2',
+    });
   }
 
   /**
@@ -64,8 +76,9 @@ class InviteController {
       inviteRepository.delete(guid),
 
       // Поменять текст приглашения
-      ctx.api.editMessageText(null, null, 'Вы отклонили приглашение...', {
+      ctx.api.editMessageText(null, null, 'Вы *отклонили* приглашение\\.\\.\\.', {
         inline_message_id: ctx.inlineMessageId,
+        parse_mode: 'MarkdownV2',
       }),
 
       // Написать ответ в бот-чат
@@ -89,6 +102,25 @@ class InviteController {
     } as InlineQueryResultArticle;
 
     return inviteAnswer;
+  }
+
+  /**
+   * Проверка приглашения на существование и на актуальность.
+   */
+  async _getActualInvite(guid: string) {
+    const invite = await inviteRepository.getByGuid(guid);
+
+    if (!invite) {
+      return null;
+    }
+
+    // Проверяем ttl приглашения
+    if ((Date.now() - (new Date(invite.createdAt)).getTime()) > INVITE_TTL) {
+      await inviteRepository.delete(guid);
+      return null;
+    }
+
+    return invite;
   }
 }
 

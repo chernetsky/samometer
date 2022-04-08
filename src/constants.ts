@@ -27,3 +27,5 @@ export const HELP_TEXT =
 export const BUTTON_SPACE_SEPARATOR = '        ';
 
 export const UUID_REGEX = '[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}';
+
+export const INVITE_TTL = 1000 * 60 * 60; // 1 hour
