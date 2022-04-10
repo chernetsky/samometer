@@ -74,9 +74,7 @@ class ListRepository {
 
   async addOwner(listId: number, userId: number) {
     return this.model.update({
-      where: {
-        id: listId,
-      },
+      where: { id: listId },
       data: {
         users: {
           connect: {
@@ -87,7 +85,25 @@ class ListRepository {
     });
   }
 
-  async getCurrentListId(userId: number): Promise<number | null> {
+  async removeOwner(listId: number, userId: number) {
+    return this.model.update({
+      where: { id: listId },
+      data: {
+        users: {
+          disconnect: {
+            id: userId,
+          },
+        },
+      },
+      include: {
+        _count: {
+          select: { users: true },
+        },
+      },
+    });
+  }
+
+  async getCurrentId(userId: number): Promise<number | null> {
     const result = await this.model.findFirst({
       select: { id: true },
       where: {
@@ -103,19 +119,6 @@ class ListRepository {
     return result?.id || null;
   }
 
-  async getCurrentList(userId: number): Promise<List> {
-    return this.model.findFirst({
-      where: {
-        specialId: LIST_SPECIAL.TODAY,
-        users: {
-          some: {
-            id: userId,
-          },
-        },
-      },
-    });
-  }
-
   async create(userId: number, data: { name: string }) {
     const { name } = data;
     return this.model.create({
@@ -128,7 +131,7 @@ class ListRepository {
     });
   }
 
-  async createSpecialList(userId: number, specialId: string) {
+  async createSpecial(userId: number, specialId: string) {
     if (await this.model.count({
       where: {
         specialId,

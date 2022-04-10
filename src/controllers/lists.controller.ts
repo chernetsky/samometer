@@ -59,8 +59,16 @@ class ListsController {
   async delete(ctx: SamometerContext, next: NextFunction) {
     const [, listId] = ctx.match;
 
+    // Удалить связь юзера со списком
+    const list = await listRepository.removeOwner(Number(listId), ctx.from.id);
+
     // Удаляем сам список
-    await listRepository.setDeleted(Number(listId));
+    if (list._count.users === 0) {
+      // Удаляем список, если владельцев не осталось
+      await listRepository.setDeleted(Number(listId));
+
+      // todo: Надо ли сохранять удалённые списки?
+    }
 
     // Возвращаемся в обычный режим
     ctx.session.subMode = SubMode.basic;

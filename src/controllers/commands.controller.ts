@@ -27,7 +27,7 @@ class CommandsController {
 
     await userRepository.upsert({ id, username });
 
-    const result = await listRepository.createSpecialList(ctx.from.id, LIST_SPECIAL.TODAY);
+    const result = await listRepository.createSpecial(ctx.from.id, LIST_SPECIAL.TODAY);
 
     return ctx.reply(result ? 'Создан список Сегодня' : 'Что сегодня делаем?');
   }

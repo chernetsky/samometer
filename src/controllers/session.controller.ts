@@ -75,7 +75,7 @@ class SessionController {
   async setListId(ctx: SamometerContext, next: NextFunction) {
     try {
       if (ctx?.chat?.id && !ctx.update.inline_query && !ctx.session.listId) {
-        const listId = await listRepository.getCurrentListId(ctx.from.id);
+        const listId = await listRepository.getCurrentId(ctx.from.id);
         if (!listId) {
           return ctx.reply('У вас нет ни одного списка. Нажмите /start, чтобы начать.');
         }

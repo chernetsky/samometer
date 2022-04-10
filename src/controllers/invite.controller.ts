@@ -71,8 +71,8 @@ class InviteController {
     // Удалить инвайт
     await inviteRepository.delete(guid);
 
-    // Написать ответ в бот-чат
     // todo: обновить список списков
+    // Написать ответ в бот-чат
     // ctx.api.sendMessage(ctx.from.id, 'Приглашение приняли...'),
 
     return ctx.api.editMessageText(
@@ -102,7 +102,7 @@ class InviteController {
       }),
 
       // Написать ответ в бот-чат
-      ctx.api.sendMessage(ctx.from.id, 'Приглашение отклонили...'),
+      // ctx.api.sendMessage(ctx.from.id, 'Приглашение отклонили...'),
     ]);
   }
 
