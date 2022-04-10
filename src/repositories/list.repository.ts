@@ -31,7 +31,7 @@ class ListRepository {
     });
   }
 
-  getListsByUserId(userId: number): Promise<WithUsersCount<List>[]> {
+  getAllByUserId(userId: number): Promise<WithUsersCount<List>[]> {
     return this.model.findMany({
       where: {
         deleted: false,
@@ -57,7 +57,7 @@ class ListRepository {
     });
   }
 
-  async getListOwners(listId: number): Promise<number[]> {
+  async getOwners(listId: number): Promise<number[]> {
     const results = await this.model.findUnique({
       where: {
         id: listId,
@@ -70,6 +70,21 @@ class ListRepository {
     });
 
     return results.users.map(u => u.id);
+  }
+
+  async addOwner(listId: number, userId: number) {
+    return this.model.update({
+      where: {
+        id: listId,
+      },
+      data: {
+        users: {
+          connect: {
+            id: userId,
+          },
+        },
+      },
+    });
   }
 
   async getCurrentListId(userId: number): Promise<number | null> {

@@ -86,7 +86,7 @@ class DealsController {
     // Отправить сообщение всем владельцам списка
     const userIds = onlyForMe ?
       [ctx.from.id] :
-      await listRepository.getListOwners(currentListId);
+      await listRepository.getOwners(currentListId);
 
     const dbSessions = onlyForMe ?
       [{ key: String(ctx.from.id), value: JSON.stringify(ctx.session) }] :

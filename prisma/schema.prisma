@@ -30,7 +30,7 @@ model List {
   tracking  Boolean  @default(true)
   createdAt DateTime @default(now())
   deleted   Boolean  @default(false)
-  guid      String?  @db.Char(36) // invite guid
+  guid      String?  @db.Char(36) // list dynamic guid
   users     User[]   @relation(references: [id])
   deals     Deal[]
   invites   Invite[]

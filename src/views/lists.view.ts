@@ -10,7 +10,7 @@ class ListsView {
     const keyboard = new InlineKeyboard();
 
     // Получаем списки юзера
-    const lists = await listRepository.getListsByUserId(ctx.from.id);
+    const lists = await listRepository.getAllByUserId(ctx.from.id);
 
     // Ренерим кнопки списков
     for (const list of lists) {

@@ -1,6 +1,7 @@
 import { Bot, InlineKeyboard } from 'grammy';
 import listRepository from '../repositories/list.repository';
 import inviteRepository from '../repositories/invite.repository';
+import userRepository from '../repositories/user.repository';
 import { SamometerContext } from './session.controller';
 import { InlineQueryResultArticle } from '@grammyjs/types';
 import { escapeMarkdown } from '../utils';
@@ -16,6 +17,9 @@ class InviteController {
     bot.callbackQuery(new RegExp(`^invite-decline-(${UUID_REGEX})$`, 'i'), this.inviteDecline.bind(this));
   }
 
+  /**
+   * Инлайн-команда на создание приглашения.
+   */
   async invite(ctx: SamometerContext) {
     const [, guid] = ctx.match;
 
@@ -29,11 +33,21 @@ class InviteController {
     // Создаём приглашение
     const invite = await inviteRepository.create(list.id);
 
+    // Текст приглашения, который увидит приглашаемый.
+    // С кнопками ответов на приглашение.
     const answer = this._generateInviteAnswer(invite.guid, list.name);
 
     return ctx.answerInlineQuery([answer]);
   }
 
+  /**
+   * Обработкик нажания на кнопку "Принять приглашение".
+   * - проверяет инвайт
+   * - проверяет наличие пользователя и создаёт, если его нет
+   * - добавляет пользователя во владельцы списка
+   * - меняет текст пригласительного сообщения
+   * - удаляет инвайт
+   */
   async inviteAccept(ctx: SamometerContext) {
     const [, guid] = ctx.match;
 
@@ -47,22 +61,28 @@ class InviteController {
       });
     }
 
-    // Выдать юзеру список
-    const userId = ctx.from.id;
-    console.log('inviteAccept', ctx.from);
-
     // Создать пользователя, если такого нет
+    const { id, username } = ctx.from;
+    await userRepository.upsert({ id, username });
 
     // Привязать пользователя к списку
-    // todo: https://www.prisma.io/docs/concepts/components/prisma-client/relation-queries#connect-an-existing-record
+    await listRepository.addOwner(invite.listId, id);
 
     // Удалить инвайт
     await inviteRepository.delete(guid);
 
-    return ctx.api.editMessageText(null, null, 'Теперь вы являетесь совладельцем списка *НАЗВАНИЕ СПИСКА*\\!\nЗапустите бот @SamometerBot и откройте список всех доступных списков\\, чтобы начать пользоваться новым списком\\.', {
-      inline_message_id: ctx.inlineMessageId,
-      parse_mode: 'MarkdownV2',
-    });
+    // Написать ответ в бот-чат
+    // todo: обновить список списков
+    // ctx.api.sendMessage(ctx.from.id, 'Приглашение приняли...'),
+
+    return ctx.api.editMessageText(
+      null,
+      null,
+      'Теперь вы являетесь совладельцем нового списка\\!\nЗапустите бот @SamometerBot и откройте перечень доступных списков\\, чтобы начать им пользоваться\\.',
+      {
+        inline_message_id: ctx.inlineMessageId,
+        parse_mode: 'MarkdownV2',
+      });
   }
 
   /**
