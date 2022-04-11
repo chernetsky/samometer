@@ -17,7 +17,7 @@ class DealsView {
 
     if (list) {
       const listKeyboard = new InlineKeyboard();
-      const deals = await dealRepository.getDealsByListId(listId);
+      const deals = await dealRepository.getAllByListId(listId);
 
       deals.forEach(d => listKeyboard.text(
         this._renderDealText.bind(this)(d.name, d.doneAt),

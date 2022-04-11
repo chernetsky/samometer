@@ -8,12 +8,13 @@ class DealRepository {
     this.dealModel = dbClient.deal;
   }
 
-  async getDealsByListId(listId: number) {
+  async getAllByListId(listId: number) {
     return this.dealModel.findMany({
       where: { listId, deleted: false },
-      orderBy: {
-        createdAt: 'asc',
-      },
+      orderBy: [
+        { createdAt: 'asc' },
+        { name: 'asc' },
+      ],
     });
   }
 

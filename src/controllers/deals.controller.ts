@@ -46,14 +46,17 @@ class DealsController {
       return ctx.reply('Это не дело...');
     }
 
-    // Добавляем дело в список
-    await dealRepository.addDeal({
-      listId: ctx.session.listId,
-      name: text,
-    });
-
     // Удаляем текущее сообщение
     await ctx.deleteMessage();
+
+    // Разбиваем на строки: одна строка - одно дело
+    const lines = text.split('\n').map(s => s.trim());
+
+    // Добавляем дела в список
+    await Promise.all(lines.map(s => dealRepository.addDeal({
+      listId: ctx.session.listId,
+      name: s,
+    })));
 
     // Обновляем список
     return this._updateList(ctx);
