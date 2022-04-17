@@ -61,7 +61,7 @@ class ListsView {
     // Иконки списка
     const shared = usersCount > 1 ? '🌐' : '';
     const current = currentListId === id ? '⭐️' : '';
-    const icons = `${current}${shared} `;
+    const icons = `${current}${shared}`;
 
     let renderedTitle;
     let callbackQueryStr;
