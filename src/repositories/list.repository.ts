@@ -50,6 +50,7 @@ class ListRepository {
         deals: {
           where: {
             doneAt: null,
+            deleted: false,
           },
           select: { id: true },
         },
