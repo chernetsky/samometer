@@ -67,12 +67,12 @@ class ListsView {
     let callbackQueryStr;
     switch (subMode) {
       case SubMode.delete:
-        renderedTitle = `${icons}${name}${BUTTON_SPACE_SEPARATOR}❌`;
+        renderedTitle = `${icons}  ${name}  ${BUTTON_SPACE_SEPARATOR}❌`;
         callbackQueryStr = `lists-delete-${id}`;
         keyboard.text(renderedTitle, callbackQueryStr);
         break;
       case SubMode.invite:
-        renderedTitle = `${icons}${name}`;
+        renderedTitle = `${icons}  ${name}`;
 
         // Обновляем у списка guid
         // todo: Надо ли нам каждый раз его обновлять?
@@ -82,7 +82,7 @@ class ListsView {
         keyboard.switchInline(renderedTitle, callbackQueryStr);
         break;
       default:
-        renderedTitle = `${icons}${name}  (${dealsCount})`;
+        renderedTitle = `${icons}  ${name}  (${dealsCount})`;
         callbackQueryStr = `mode-deals-${id}`;
         keyboard.text(renderedTitle, callbackQueryStr);
     }
