@@ -3,9 +3,10 @@ import db from '../providers/db';
 import { List, Prisma, PrismaClient } from '@prisma/client';
 import { LIST_SPECIAL, LIST_SPECIAL_DESCRIPTORS } from '../constants';
 
-export type WithUsersCount<T> = T & {
+export type ListWithCounts<T> = T & {
   _count: {
     users: number,
+    deals: number,
   },
 };
 class ListRepository {
@@ -31,7 +32,7 @@ class ListRepository {
     });
   }
 
-  getAllByUserId(userId: number): Promise<WithUsersCount<List>[]> {
+  getAllByUserId(userId: number): Promise<ListWithCounts<List>[]> {
     return this.model.findMany({
       where: {
         deleted: false,
@@ -46,13 +47,11 @@ class ListRepository {
       },
       include: {
         _count: {
-          select: { users: true },
+          select: {
+            users: true,
+            deals: true,
+          },
         },
-        // users: {
-        //   select: {
-        //     id: true,
-        //   },
-        // },
       },
     });
   }

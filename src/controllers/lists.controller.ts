@@ -81,6 +81,11 @@ class ListsController {
     next();
   }
 
+  /**
+   * Отображение актуального списка списков.
+   * - обновляет существующее сообщение
+   * - или отправляет новое
+   */
   async update(ctx: SamometerContext) {
     const listRender = await listsView.render(ctx);
 
