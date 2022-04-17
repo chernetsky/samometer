@@ -3,11 +3,9 @@ import db from '../providers/db';
 import { List, Prisma, PrismaClient } from '@prisma/client';
 import { LIST_SPECIAL, LIST_SPECIAL_DESCRIPTORS } from '../constants';
 
-export type ListWithCounts<T> = T & {
-  _count: {
-    users: number,
-    deals: number,
-  },
+export type ListWithRelations<T> = T & {
+  users: { id: number }[],
+  deals: { id: number }[],
 };
 class ListRepository {
   model: Prisma.ListDelegate<Prisma.RejectOnNotFound | Prisma.RejectPerOperation>;
@@ -32,7 +30,7 @@ class ListRepository {
     });
   }
 
-  getAllByUserId(userId: number): Promise<ListWithCounts<List>[]> {
+  getAllByUserId(userId: number): Promise<ListWithRelations<List>[]> {
     return this.model.findMany({
       where: {
         deleted: false,
@@ -46,11 +44,14 @@ class ListRepository {
         createdAt: 'asc',
       },
       include: {
-        _count: {
-          select: {
-            users: true,
-            deals: true,
+        users: {
+          select: { id: true },
+        },
+        deals: {
+          where: {
+            doneAt: null,
           },
+          select: { id: true },
         },
       },
     });

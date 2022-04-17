@@ -1,7 +1,7 @@
 import { InlineKeyboard } from 'grammy';
 import { List } from '@prisma/client';
 import { SamometerContext, SubMode } from '../controllers/session.controller';
-import listRepository, { ListWithCounts } from '../repositories/list.repository';
+import listRepository, { ListWithRelations } from '../repositories/list.repository';
 import { BUTTON_SPACE_SEPARATOR } from '../constants';
 
 class ListsView {
@@ -54,12 +54,12 @@ class ListsView {
     keyboard: InlineKeyboard,
     subMode: SubMode,
     currentListId: number,
-    list: ListWithCounts<List>) {
+    list: ListWithRelations<List>) {
 
-    const { id, name, _count: { users: usersCount, deals: dealsCount } } = list;
+    const { id, name, users, deals } = list;
 
     // Иконки списка
-    const shared = usersCount > 1 ? '🌐' : '';
+    const shared = users.length > 1 ? '🌐' : '';
     const current = currentListId === id ? '⭐️' : '';
     const icons = `${current}${shared}`;
 
@@ -82,7 +82,7 @@ class ListsView {
         keyboard.switchInline(renderedTitle, callbackQueryStr);
         break;
       default:
-        renderedTitle = `${icons}  ${name}  (${dealsCount})`;
+        renderedTitle = `${icons}  ${name}  (${deals.length})`;
         callbackQueryStr = `mode-deals-${id}`;
         keyboard.text(renderedTitle, callbackQueryStr);
     }
