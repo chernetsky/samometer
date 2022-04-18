@@ -12,27 +12,26 @@ class ListsController {
   }
 
   init(bot: Bot) {
-    // Вывод списка
-    bot.callbackQuery(
-      'mode-lists',
-      this.update.bind(this));
+    // Вывод списка списков
+    bot.callbackQuery('mode-lists', this.lists.bind(this));
+    bot.command('lists', this.lists.bind(this));
 
     // Смена суб-режима
-    bot.callbackQuery(
-      /^submode-\w+$/,
-      this.update.bind(this));
-
-    // Удаление списка
-    bot.callbackQuery(
-      /^lists-delete-(\d+)$/,
-      this.delete.bind(this),
-      this.update.bind(this));
+    bot.callbackQuery(/^submode-\w+$/, this.lists.bind(this));
 
     // Добавление нового списка
-    bot.on(
-      'message',
-      this.add.bind(this),
-      this.update.bind(this));
+    bot.on('message', this.add.bind(this));
+
+    // Удаление списка
+    bot.callbackQuery(/^lists-delete-(\d+)$/, this.delete.bind(this));
+  }
+
+  /**
+   * Вывод списка списков
+   */
+  async lists(ctx: SamometerContext) {
+    // Обновляем список только для текущего юзера
+    return this._update(ctx);
   }
 
   async add(ctx: SamometerContext, next: NextFunction) {
@@ -53,10 +52,10 @@ class ListsController {
     // Удаляем текущее сообщение
     await ctx.deleteMessage();
 
-    next();
+    return this._update(ctx);
   }
 
-  async delete(ctx: SamometerContext, next: NextFunction) {
+  async delete(ctx: SamometerContext) {
     const [, listId] = ctx.match;
 
     // Удалить связь юзера со списком
@@ -78,7 +77,7 @@ class ListsController {
       ctx.session.listId = null;
     }
 
-    next();
+    return this._update(ctx);
   }
 
   /**
@@ -86,7 +85,7 @@ class ListsController {
    * - обновляет существующее сообщение
    * - или отправляет новое
    */
-  async update(ctx: SamometerContext) {
+  async _update(ctx: SamometerContext) {
     const listRender = await listsView.render(ctx);
 
     if (ctx.session.messageId) {

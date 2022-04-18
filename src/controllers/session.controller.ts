@@ -2,7 +2,7 @@ import { Bot, Context, NextFunction, session, SessionFlavor } from 'grammy';
 import db from '../providers/db';
 import { PrismaAdapter } from '../utils/PrismaAdapter';
 import listRepository from '../repositories/list.repository';
-import { deleteNotTrackingMessage } from '../utils';
+import { deleteNotTrackingMessage, deleteSessionMessage } from '../utils';
 
 export enum Mode {
   deals = 'deals',
@@ -48,7 +48,10 @@ class SessionController {
 
     bot.callbackQuery(/^submode-(\w+)$/, this.setSubMode.bind(this));
 
-    bot.command('list', this.listCmd.bind(this));
+    bot.command('start', this.dealsCmd.bind(this));
+    bot.command('deals', this.dealsCmd.bind(this));
+
+    bot.command('lists', this.listsCmd.bind(this));
 
     bot.command('deb', this.debCmd.bind(this));
   }
@@ -91,12 +94,23 @@ class SessionController {
   }
 
   /**
-   * Команда /list
+   * Команда /deals
    * - переключение в режим отображения списка deals
    * - и передаёт управления дальше
    */
-  async listCmd(ctx: SamometerContext, next: NextFunction) {
+  async dealsCmd(ctx: SamometerContext, next: NextFunction) {
     await this._changeMode(ctx, Mode.deals);
+
+    return next();
+  }
+
+  /**
+   * Команда /lists
+   * - переключение в режим отображения списка deals
+   * - и передаёт управления дальше
+   */
+  async listsCmd(ctx: SamometerContext, next: NextFunction) {
+    await this._changeMode(ctx, Mode.lists);
 
     return next();
   }
@@ -145,10 +159,7 @@ class SessionController {
      * - если это команда /list, то хотят новый список - либо нет сообщения, либо оно уехало наверх
      * - если это смена режима, то проще удалить и создать заново, чем редактировать текст и кнопки
      */
-    if (ctx.session.messageId) {
-      await ctx.api.deleteMessage(ctx.chat.id, ctx.session.messageId).catch(() => { /* Ошибка удаления */ });
-      ctx.session.messageId = null;
-    }
+    await deleteSessionMessage(ctx);
   }
 
   async debCmd(ctx: SamometerContext) {

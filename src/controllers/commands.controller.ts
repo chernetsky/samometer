@@ -10,6 +10,8 @@ class CommandsController {
 
     bot.command('start', this.start.bind(this));
     bot.command('help', this.help.bind(this));
+
+    bot.command('donate', this.donate.bind(this));
   }
 
   filter(ctx: SamometerContext, next: NextFunction) {
@@ -22,14 +24,16 @@ class CommandsController {
   /**
    * Создание дефолтных списков при старте
    */
-  async start(ctx: SamometerContext) {
+  async start(ctx: SamometerContext, next: NextFunction) {
     const { id, username } = ctx.from;
 
     await userRepository.upsert({ id, username });
 
     const result = await listRepository.createSpecial(ctx.from.id, LIST_SPECIAL.TODAY);
 
-    return ctx.reply(result ? 'Создан список Сегодня' : 'Что сегодня делаем?');
+    await ctx.reply(result ? 'Создан список Сегодня. ' : 'Что сегодня делаем?');
+
+    next();
   }
 
   /**
@@ -37,6 +41,10 @@ class CommandsController {
    */
   async help(ctx: SamometerContext) {
     return ctx.reply(HELP_TEXT, { parse_mode: 'MarkdownV2' });
+  }
+
+  async donate(ctx: SamometerContext) {
+    return ctx.reply('Скоро прикрутим донаты', { parse_mode: 'MarkdownV2' });
   }
 }
 

@@ -15,8 +15,9 @@ class DealsController {
 
   init(bot: Bot) {
     // Вывод списка
-    bot.callbackQuery(/^mode-deals(-(\d+))?/, this.list.bind(this));
-    bot.command('list', this.list.bind(this));
+    bot.callbackQuery(/^mode-deals(-(\d+))?/, this.deals.bind(this));
+    bot.command('deals', this.deals.bind(this));
+    bot.command('start', this.deals.bind(this));
 
     // Создать дело
     bot.on('message', this.add.bind(this));
@@ -29,9 +30,9 @@ class DealsController {
   }
 
   /**
-   * Вывод текущего списка
+   * Вывод текущего списка дел
    */
-  async list(ctx: SamometerContext) {
+  async deals(ctx: SamometerContext) {
     // Обновляем список только для текущего юзера
     return this._updateList(ctx, true);
   }
