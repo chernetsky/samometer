@@ -57,5 +57,5 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd ${{ secrets.SSH_DIR }}
-            docker-compose down --rmi all
-            docker-compose up -d
+            docker compose down --rmi all
+            docker compose up -d
