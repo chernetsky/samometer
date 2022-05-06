@@ -7,3 +7,9 @@ services:
       - BOT_TOKEN
     extra_hosts:
       - host.docker.internal:host-gateway # даёт доступ к базе на localhost (host.docker.internal)
+    deploy:
+      restart_policy:
+        # condition: on-failure
+        delay: 5s
+        max_attempts: 5
+        # window: 120s

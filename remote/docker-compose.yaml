@@ -9,3 +9,9 @@ services:
       - host.docker.internal:host-gateway # даёт доступ к базе на localhost (host.docker.internal)
     stdin_open: true # docker run -i
     tty: true # docker run -t
+    deploy:
+      restart_policy:
+        # condition: on-failure
+        delay: 5s
+        max_attempts: 5
+        # window: 120s
