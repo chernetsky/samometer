@@ -22,8 +22,15 @@ function bootstrap() {
   bot.start();
 
   // Enable graceful stop
-  process.once('SIGINT', () => bot.stop());
-  process.once('SIGTERM', () => bot.stop());
+  process.once('SIGINT', () => {
+    console.log('SIGINT', (new Date()).toISOString());
+    bot.stop();
+  });
+
+  process.once('SIGTERM', () => {
+    console.log('SIGTERM', (new Date()).toISOString());
+    bot.stop();
+  });
 }
 
 bootstrap();
