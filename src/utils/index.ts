@@ -1,13 +1,12 @@
-// import { SamometerContext } from "../";
-
-import { SamometerContext } from "controllers/session.controller";
+import { SamometerContext } from 'controllers/session.controller';
 
 export async function deleteSessionMessage(ctx: SamometerContext) {
   if (ctx.session.messageId) {
     await ctx.api
       .deleteMessage(ctx.chat.id, ctx.session.messageId)
       .catch((err) => {
-        console.log("delete session message error", err);
+        // eslint-disable-next-line no-console
+        console.log('delete session message error', err);
         /* Не удаляется */
       });
 
@@ -20,7 +19,8 @@ export async function deleteNotTrackingMessage(ctx: SamometerContext) {
     await ctx.api
       .deleteMessage(ctx.chat.id, ctx.msg.message_id)
       .catch((err) => {
-        console.log("delete not tracking message error", err);
+        // eslint-disable-next-line no-console
+        console.log('delete not tracking message error', err);
         /* Не удаляется */
       });
   }
@@ -28,29 +28,31 @@ export async function deleteNotTrackingMessage(ctx: SamometerContext) {
 
 export function escapeMarkdown(rawStr: string) {
   const symbolsToEscape = [
-    "_",
-    "*",
-    "[",
-    "]",
-    "(",
-    ")",
-    "~",
-    "`",
-    ">",
-    "#",
-    "+",
-    "-",
-    "=",
-    "|",
-    "{",
-    "}",
-    ".",
-    "!",
+    '_',
+    '*',
+    '[',
+    ']',
+    '(',
+    ')',
+    '~',
+    '`',
+    '>',
+    '#',
+    '+',
+    '-',
+    '=',
+    '|',
+    '{',
+    '}',
+    '.',
+    '!',
   ];
 
   let escapedStr = rawStr;
   symbolsToEscape.forEach(
-    (ch) => (escapedStr = escapedStr.replace(ch, `\\${ch}`))
+    (ch) => {
+      escapedStr = escapedStr.replace(ch, `\\${ch}`);
+    },
   );
 
   return escapedStr;
