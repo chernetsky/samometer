@@ -1,10 +1,10 @@
 import { Bot, NextFunction } from 'grammy';
+import { map } from 'ramda';
 import dealsView from '../views/deals.view';
 import dealRepository from '../repositories/deal.repository';
 import listRepository from '../repositories/list.repository';
 import sessionRepository from '../repositories/session.repository';
 import { SamometerContext } from './session.controller';
-import { map } from 'ramda';
 
 class DealsController {
   private mode: string;
@@ -51,10 +51,10 @@ class DealsController {
     await ctx.deleteMessage();
 
     // Разбиваем на строки: одна строка - одно дело
-    const lines = text.split('\n').map(s => s.trim());
+    const lines = text.split('\n').map((s) => s.trim());
 
     // Добавляем дела в список
-    await Promise.all(lines.map(s => dealRepository.addDeal({
+    await Promise.all(lines.map((s) => dealRepository.addDeal({
       listId: ctx.session.listId,
       name: s,
     })));
@@ -88,13 +88,13 @@ class DealsController {
     const listRender = await dealsView.render(currentListId);
 
     // Отправить сообщение всем владельцам списка
-    const userIds = onlyForMe ?
-      [ctx.from.id] :
-      await listRepository.getOwners(currentListId);
+    const userIds = onlyForMe
+      ? [ctx.from.id]
+      : await listRepository.getOwners(currentListId);
 
-    const dbSessions = onlyForMe ?
-      [{ key: String(ctx.from.id), value: JSON.stringify(ctx.session) }] :
-      await sessionRepository.getByKeys(map(String, userIds));
+    const dbSessions = onlyForMe
+      ? [{ key: String(ctx.from.id), value: JSON.stringify(ctx.session) }]
+      : await sessionRepository.getByKeys(map(String, userIds));
 
     for (const s of dbSessions) {
       const { key: chatId, value } = s;
@@ -116,7 +116,6 @@ class DealsController {
             /* Список не поменялся */
             console.log('_updateList catch message update', err);
           });
-
       } else {
         // Заново создаём сообщение со списком
         const response = await ctx.api.sendMessage(chatId, text, markup);
