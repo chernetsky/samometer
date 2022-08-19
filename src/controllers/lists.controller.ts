@@ -31,7 +31,7 @@ class ListsController {
    */
   async lists(ctx: SamometerContext) {
     // Обновляем список только для текущего юзера
-    return this._update(ctx);
+    return this.update(ctx);
   }
 
   async add(ctx: SamometerContext, next: NextFunction) {
@@ -52,7 +52,7 @@ class ListsController {
     // Удаляем текущее сообщение
     await ctx.deleteMessage();
 
-    return this._update(ctx);
+    return this.update(ctx);
   }
 
   async delete(ctx: SamometerContext) {
@@ -62,11 +62,10 @@ class ListsController {
     const list = await listRepository.removeOwner(Number(listId), ctx.from.id);
 
     // Удаляем сам список
+    // eslint-disable-next-line no-underscore-dangle
     if (list._count.users === 0) {
       // Удаляем список, если владельцев не осталось
-      await listRepository.setDeleted(Number(listId));
-
-      // todo: Надо ли сохранять удалённые списки?
+      await listRepository.delete(Number(listId));
     }
 
     // Возвращаемся в обычный режим
@@ -77,7 +76,7 @@ class ListsController {
       ctx.session.listId = null;
     }
 
-    return this._update(ctx);
+    return this.update(ctx);
   }
 
   /**
@@ -85,7 +84,7 @@ class ListsController {
    * - обновляет существующее сообщение
    * - или отправляет новое
    */
-  async _update(ctx: SamometerContext) {
+  private async update(ctx: SamometerContext) {
     const listRender = await listsView.render(ctx);
 
     if (ctx.session.messageId) {
@@ -94,12 +93,7 @@ class ListsController {
       await Promise.all([
         ctx.api.editMessageText(ctx.chat.id, ctx.session.messageId, text, { parse_mode: 'MarkdownV2' }),
         ctx.api.editMessageReplyMarkup(ctx.chat.id, ctx.session.messageId, markup),
-      ])
-        .catch((err) => {
-          /* Список не поменялся */
-          console.log('update() error', err);
-        });
-
+      ]).catch(() => { /* Список не поменялся */ });
     } else {
       // Заново создаём сообщение со списком
       const response = await ctx.reply.apply(ctx, listRender);

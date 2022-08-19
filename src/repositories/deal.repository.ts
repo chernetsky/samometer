@@ -1,5 +1,5 @@
-import db from '../providers/db';
 import { Prisma, PrismaClient } from '@prisma/client';
+import db from '../providers/db';
 
 class DealRepository {
   dealModel: Prisma.DealDelegate<Prisma.RejectOnNotFound | Prisma.RejectPerOperation>;
@@ -39,14 +39,11 @@ class DealRepository {
     });
   }
 
-  async setDeleted(listId: number) {
-    return this.dealModel.updateMany({
+  deleteDone(listId: number) {
+    return this.dealModel.deleteMany({
       where: {
         listId,
         doneAt: { not: null },
-      },
-      data: {
-        deleted: true,
       },
     });
   }

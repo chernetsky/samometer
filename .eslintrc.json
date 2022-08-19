@@ -18,7 +18,8 @@
         "@typescript-eslint/eslint-plugin"
     ],
     "rules": {
-        "class-methods-use-this": "off"
+        "class-methods-use-this": "off",
+        "@typescript-eslint/naming-convention": "off"
     },
     "settings": {
         "import/resolver": {

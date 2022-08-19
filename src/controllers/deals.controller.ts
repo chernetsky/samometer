@@ -34,7 +34,7 @@ class DealsController {
    */
   async deals(ctx: SamometerContext) {
     // Обновляем список только для текущего юзера
-    return this._updateList(ctx, true);
+    return this.updateList(ctx, true);
   }
 
   async add(ctx: SamometerContext, next: NextFunction) {
@@ -60,7 +60,7 @@ class DealsController {
     })));
 
     // Обновляем список
-    return this._updateList(ctx);
+    return this.updateList(ctx);
   }
 
   async done(ctx: SamometerContext) {
@@ -70,18 +70,18 @@ class DealsController {
     await dealRepository.changeDone(Number(dealId), action === 'done');
 
     // Обновляем список
-    return this._updateList(ctx);
+    return this.updateList(ctx);
   }
 
   async clear(ctx: SamometerContext) {
-    // Меняем статус deleted
-    await dealRepository.setDeleted(ctx.session.listId);
+    // Удаляем сделанные дела
+    await dealRepository.deleteDone(ctx.session.listId);
 
     // Обновляем список
-    return this._updateList(ctx);
+    return this.updateList(ctx);
   }
 
-  async _updateList(ctx: SamometerContext, onlyForMe = false) {
+  private async updateList(ctx: SamometerContext, onlyForMe = false) {
     const currentListId = ctx.session.listId;
 
     // Получаем рендер списка
@@ -112,10 +112,7 @@ class DealsController {
       if (messageId) {
         // Обновляем сообщение со списком
         await ctx.api.editMessageReplyMarkup(chatId, messageId, markup)
-          .catch((err) => {
-            /* Список не поменялся */
-            console.log('_updateList catch message update', err);
-          });
+          .catch(() => { /* Список не поменялся */ });
       } else {
         // Заново создаём сообщение со списком
         const response = await ctx.api.sendMessage(chatId, text, markup);

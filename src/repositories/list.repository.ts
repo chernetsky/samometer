@@ -1,6 +1,8 @@
 import { randomUUID } from 'crypto';
+import {
+  List, prisma, Prisma, PrismaClient,
+} from '@prisma/client';
 import db from '../providers/db';
-import { List, Prisma, PrismaClient } from '@prisma/client';
 import { LIST_SPECIAL, LIST_SPECIAL_DESCRIPTORS } from '../constants';
 
 export type ListWithRelations<T> = T & {
@@ -8,14 +10,21 @@ export type ListWithRelations<T> = T & {
   deals: { id: number }[],
 };
 class ListRepository {
-  model: Prisma.ListDelegate<Prisma.RejectOnNotFound | Prisma.RejectPerOperation>;
+  modelList: Prisma.ListDelegate<Prisma.RejectOnNotFound | Prisma.RejectPerOperation>;
+
+  modelDeal: Prisma.DealDelegate<Prisma.RejectOnNotFound | Prisma.RejectPerOperation>;
+
+  dbClient: PrismaClient;
 
   constructor(dbClient: PrismaClient) {
-    this.model = dbClient.list;
+    this.dbClient = dbClient;
+
+    this.modelList = dbClient.list;
+    this.modelDeal = dbClient.deal;
   }
 
   getById(id: number): Promise<List> {
-    return this.model.findUnique({
+    return this.modelList.findUnique({
       where: {
         id,
       },
@@ -23,7 +32,7 @@ class ListRepository {
   }
 
   getByGuid(guid: string): Promise<List> {
-    return this.model.findFirst({
+    return this.modelList.findFirst({
       where: {
         guid,
       },
@@ -31,7 +40,7 @@ class ListRepository {
   }
 
   getAllByUserId(userId: number): Promise<ListWithRelations<List>[]> {
-    return this.model.findMany({
+    return this.modelList.findMany({
       where: {
         deleted: false,
         users: {
@@ -59,7 +68,7 @@ class ListRepository {
   }
 
   async getOwners(listId: number): Promise<number[]> {
-    const results = await this.model.findUnique({
+    const results = await this.modelList.findUnique({
       where: {
         id: listId,
       },
@@ -70,11 +79,11 @@ class ListRepository {
       },
     });
 
-    return results.users.map(u => u.id);
+    return results.users.map((u) => u.id);
   }
 
   async addOwner(listId: number, userId: number) {
-    return this.model.update({
+    return this.modelList.update({
       where: { id: listId },
       data: {
         users: {
@@ -87,7 +96,7 @@ class ListRepository {
   }
 
   async removeOwner(listId: number, userId: number) {
-    return this.model.update({
+    return this.modelList.update({
       where: { id: listId },
       data: {
         users: {
@@ -105,7 +114,7 @@ class ListRepository {
   }
 
   async getCurrentId(userId: number): Promise<number | null> {
-    const result = await this.model.findFirst({
+    const result = await this.modelList.findFirst({
       select: { id: true },
       where: {
         specialId: LIST_SPECIAL.TODAY,
@@ -122,7 +131,7 @@ class ListRepository {
 
   async create(userId: number, data: { name: string }) {
     const { name } = data;
-    return this.model.create({
+    return this.modelList.create({
       data: {
         name,
         users: {
@@ -133,7 +142,7 @@ class ListRepository {
   }
 
   async createSpecial(userId: number, specialId: string) {
-    if (await this.model.count({
+    if (await this.modelList.count({
       where: {
         specialId,
         users: {
@@ -143,7 +152,7 @@ class ListRepository {
         },
       },
     }) === 0) {
-      return this.model.create({
+      return this.modelList.create({
         data: {
           specialId,
           name: LIST_SPECIAL_DESCRIPTORS[specialId].name,
@@ -156,23 +165,29 @@ class ListRepository {
         },
       });
     }
+
+    return null;
   }
 
-  setDeleted(id: number) {
-    return this.model.update({
+  delete(id: number) {
+    const deleteDeals = this.modelDeal.deleteMany({
+      where: {
+        listId: id,
+      },
+    });
+    const deleteList = this.modelList.delete({
       where: {
         id,
       },
-      data: {
-        deleted: true,
-      },
     });
+
+    return this.dbClient.$transaction([deleteDeals, deleteList]);
   }
 
   async updateGuid(id: number) {
     const guid = randomUUID();
 
-    await this.model.update({
+    await this.modelList.update({
       where: {
         id,
       },

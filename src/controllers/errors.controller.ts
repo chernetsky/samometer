@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { Bot, GrammyError, HttpError } from 'grammy';
 
 class ErrorsController {
