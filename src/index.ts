@@ -14,7 +14,7 @@ function bootstrap() {
     commandsController,
     //sessionController,
     dealsController,
-    //listsController,
+    listsController,
     //inviteController,
     errorsController,
   ].forEach(c => {
