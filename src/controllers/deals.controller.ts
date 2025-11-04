@@ -115,7 +115,9 @@ class DealsController {
           .catch(() => { /* Список не поменялся */ });
       } else {
         // Заново создаём сообщение со списком
-        const response = await ctx.api.sendMessage(chatId, text, markup);
+        const response = await ctx.api.sendMessage(chatId, text, markup).catch(err => {
+          console.error(`updateList error: ${err.message}`);
+        });
 
         const { message_id } = response;
         if (message_id && String(ctx.from.id) === chatId) {
