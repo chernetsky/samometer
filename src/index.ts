@@ -9,7 +9,7 @@ import sessionController, { SamometerContext } from './controllers/session.contr
 
 function bootstrap() {
   const bot = new Bot<SamometerContext>(process.env.BOT_TOKEN);
-
+  console.debug('Bot object created...');
   [
     commandsController,
     sessionController,
@@ -19,7 +19,11 @@ function bootstrap() {
     errorsController,
   ].forEach(c => c.init(bot));
 
+  console.debug('Controllers initialized...');
+  
   bot.start();
+
+  console.debug('Bot started...');
 
   // Enable graceful stop
   process.once('SIGINT', () => {
