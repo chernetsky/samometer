@@ -11,7 +11,7 @@ function bootstrap() {
   const bot = new Bot<SamometerContext>(process.env.BOT_TOKEN);
   console.debug('Bot object created...');
   [
-    //commandsController,
+    commandsController,
     //sessionController,
     //dealsController,
     //listsController,
