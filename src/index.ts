@@ -13,7 +13,7 @@ function bootstrap() {
   [
     commandsController,
     //sessionController,
-    //dealsController,
+    dealsController,
     //listsController,
     //inviteController,
     errorsController,
