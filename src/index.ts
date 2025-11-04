@@ -12,7 +12,7 @@ function bootstrap() {
   console.debug('Bot object created...');
   [
     commandsController,
-    //sessionController,
+    sessionController,
     dealsController,
     listsController,
     //inviteController,
