@@ -11,11 +11,11 @@ function bootstrap() {
   const bot = new Bot<SamometerContext>(process.env.BOT_TOKEN);
   console.debug('Bot object created...');
   [
-    commandsController,
-    sessionController,
-    dealsController,
-    listsController,
-    inviteController,
+    //commandsController,
+    //sessionController,
+    //dealsController,
+    //listsController,
+    //inviteController,
     errorsController,
   ].forEach(c => {
     try {
