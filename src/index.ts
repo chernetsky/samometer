@@ -17,7 +17,13 @@ function bootstrap() {
     listsController,
     inviteController,
     errorsController,
-  ].forEach(c => c.init(bot));
+  ].forEach(c => {
+    try {
+      c.init(bot);
+    } catch (err) {
+      console.error(`${c.constructor.name} init error: ${err.message}`);
+    }
+  });
 
   console.debug('Controllers initialized...');
   
