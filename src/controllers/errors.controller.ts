@@ -19,7 +19,7 @@ class ErrorsController {
       } else {
         console.error('Unknown error:', e);
       }
-      return ctx.reply('Бот сломался :(');
+      // return ctx.reply('Бот сломался :(');
     });
   }
 }
