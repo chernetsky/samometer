@@ -95,12 +95,16 @@ class ListsController {
         ctx.api.editMessageReplyMarkup(ctx.chat.id, ctx.session.messageId, markup),
       ]).catch(() => { /* Список не поменялся */ });
     } else {
-      // Заново создаём сообщение со списком
+      try {
+        // Заново создаём сообщение со списком
       const response = await ctx.reply.apply(ctx, listRender);
 
       const { message_id } = response;
       if (message_id) {
         ctx.session.messageId = message_id;
+      }
+      } catch (err) {
+        console.error(`Update list error: ${err.message}`);
       }
     }
   }
